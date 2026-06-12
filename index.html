@@ -1,0 +1,789 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pip &amp; Tangle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#f3ecfb; --bg2:#fdf2f0; --card:#ffffff;
+  --ink:#3a2b4f; --ink-soft:#8a7da0;
+  --grape:#a64fc9; --grape-deep:#6f2f93; --orchid:#c861d9; --lilac:#efd9ff;
+  --mint:#3fd6a8; --gold:#ffc23f; --tangerine:#ff8a3f; --pink:#ff7ec9; --blue:#5b8ff5;
+  --shadow:rgba(111,47,147,.16);
+}
+[data-theme="sunset"]{ --bg1:#fff0e6; --bg2:#ffe3ec; --grape:#ff7e79; --grape-deep:#c8530f; --orchid:#ff9a8b; --lilac:#ffe0d6; --shadow:rgba(200,83,15,.16);}
+[data-theme="ocean"]{ --bg1:#e3f7ff; --bg2:#e6fff5; --grape:#1aa6bd; --grape-deep:#0f6f7e; --orchid:#46c4d6; --lilac:#d2f0f7; --ink:#234a55; --ink-soft:#5d8893; --shadow:rgba(15,111,126,.16);}
+[data-theme="bubblegum"]{ --bg1:#ffe9f8; --bg2:#efe6ff; --grape:#ff5b9e; --grape-deep:#b43378; --orchid:#c861d9; --lilac:#ffd9ee; --shadow:rgba(180,51,120,.16);}
+[data-theme="forest"]{ --bg1:#ecf7e6; --bg2:#f6f7df; --grape:#5a9e3e; --grape-deep:#3a6f2a; --orchid:#8bc34a; --lilac:#ddeccb; --ink:#33452f; --ink-soft:#6f8767; --shadow:rgba(58,111,42,.16);}
+[data-theme="night"]{ --bg1:#2b2c4a; --bg2:#3a3d6b; --card:#34355a; --ink:#f1ecff; --ink-soft:#b6b0d8; --grape:#b07cff; --grape-deep:#d7c4ff; --orchid:#8fb0ff; --lilac:#4a4a7a; --shadow:rgba(0,0,0,.35);}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:'Nunito',system-ui,-apple-system,sans-serif; color:var(--ink);
+  background:linear-gradient(170deg,var(--bg1),var(--bg2)); background-attachment:fixed;
+  -webkit-font-smoothing:antialiased; min-height:100dvh; transition:background .5s;
+}
+#screen{max-width:470px;margin:0 auto;min-height:100dvh}
+h1,h2,h3,.disp{font-family:'Baloo 2',cursive;margin:0}
+.pad{padding:0 18px 40px}
+.fade{animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* top chips */
+.toprow{display:flex;align-items:center;gap:8px;padding:14px 18px 6px}
+.pointchip,.streakpill{background:var(--card);border-radius:999px;padding:8px 14px;font-weight:800;box-shadow:0 4px 12px var(--shadow);font-size:15px}
+.streakpill{color:var(--tangerine)}
+.back{background:var(--card);border:none;border-radius:999px;width:42px;height:42px;font-size:22px;cursor:pointer;box-shadow:0 4px 12px var(--shadow);color:var(--ink);flex:none}
+.back:focus-visible,button:focus-visible{outline:4px solid var(--grape);outline-offset:2px}
+.spacer{flex:1}
+
+/* hero / home */
+.hero-name{font-family:'Baloo 2';font-size:15px;font-weight:700;color:var(--grape);letter-spacing:.5px;text-transform:uppercase;opacity:.9}
+.hello{font-family:'Baloo 2';font-size:30px;color:var(--grape-deep);margin-top:-2px}
+.duo{display:flex;justify-content:center;align-items:flex-end;gap:6px}
+.char-wrap{display:flex;justify-content:center}
+.char.idle{animation:bob 3.6s ease-in-out infinite}
+.char.happy{animation:hop 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes hop{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+svg{display:block;overflow:visible}
+
+.speech{background:var(--card);border-radius:20px;padding:14px 16px;box-shadow:0 6px 16px var(--shadow);font-weight:700;font-size:15px;line-height:1.45;position:relative;margin-top:8px}
+.speech:before{content:"";position:absolute;top:-9px;left:40px;border:9px solid transparent;border-top:0;border-bottom-color:var(--card)}
+.speech b{color:var(--grape-deep)}
+
+.statrow{display:flex;gap:10px;margin-top:14px}
+.statcard{flex:1;background:var(--card);border-radius:18px;padding:10px;text-align:center;box-shadow:0 4px 12px var(--shadow)}
+.statnum{font-family:'Baloo 2';font-size:24px;color:var(--grape-deep);line-height:1}
+.statlbl{font-size:10px;font-weight:800;color:var(--ink-soft);letter-spacing:.5px}
+
+/* doors */
+.door{width:100%;border:none;text-align:left;border-radius:22px;padding:16px;margin-top:11px;cursor:pointer;
+  display:flex;align-items:center;gap:14px;box-shadow:0 7px 0 var(--shadow);transition:transform .08s, box-shadow .08s;color:var(--ink);background:var(--card)}
+.door:active{transform:translateY(4px);box-shadow:0 3px 0 var(--shadow)}
+.door .emoji{font-size:30px;width:46px;text-align:center;flex:none}
+.door .dt{font-family:'Baloo 2';font-size:19px;font-weight:700}
+.door .ds{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+.door.before{background:#eaf3ff}.door.during{background:#ffe7dd}.door.brave{background:#fff2d6}
+.door.people{background:#eafaf3}.door.gratitude{background:#fff6df}
+[data-theme="night"] .door{background:#3e3f68}[data-theme="night"] .door.before,[data-theme="night"] .door.during,[data-theme="night"] .door.brave,[data-theme="night"] .door.people,[data-theme="night"] .door.gratitude{background:#42436e}
+
+.minirow{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+.minicard{flex:1;min-width:64px;background:var(--card);border:none;border-radius:16px;padding:12px 6px;cursor:pointer;box-shadow:0 4px 12px var(--shadow);color:var(--ink)}
+.minicard .mi{font-size:24px}.minicard .ml{font-size:11.5px;font-weight:800;margin-top:3px}
+.minicard.wearing{outline:3px solid var(--grape)}
+
+/* steps */
+.step-tag{display:inline-block;background:var(--lilac);color:var(--grape-deep);font-weight:800;font-size:11.5px;letter-spacing:.6px;padding:6px 12px;border-radius:999px;margin-top:6px}
+.step-title{font-family:'Baloo 2';font-size:25px;color:var(--grape-deep);margin-top:10px;line-height:1.12}
+.step-sub{color:var(--ink-soft);font-weight:700;font-size:14px;margin-top:6px;line-height:1.4}
+.card{background:var(--card);border-radius:20px;padding:15px;box-shadow:0 6px 16px var(--shadow);margin-top:12px}
+.card h3{color:var(--grape-deep);font-size:17px;margin:0 0 4px}
+.card p{margin:0;font-weight:600;line-height:1.5;font-size:14.5px}
+.card.tip{background:var(--lilac)}
+[data-theme="night"] .card.tip{background:#45456f}
+
+.choice{width:100%;border:none;background:var(--card);border-radius:16px;padding:14px;margin-top:10px;text-align:left;
+  font-weight:700;font-size:15.5px;cursor:pointer;box-shadow:0 4px 0 var(--shadow);display:flex;align-items:center;gap:12px;color:var(--ink);transition:transform .08s,box-shadow .08s}
+.choice:active{transform:translateY(3px);box-shadow:0 1px 0 var(--shadow)}
+.choice.on{background:var(--grape);color:#fff}
+.choice .ce{font-size:23px;flex:none}
+
+.btn{width:100%;border:none;background:var(--grape);color:#fff;border-radius:18px;padding:15px;margin-top:14px;
+  font-family:'Baloo 2';font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 6px 0 var(--shadow);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--shadow)}
+.btn.go{background:var(--mint);color:#0f4536}
+.btn.ghost{background:transparent;color:var(--ink-soft);box-shadow:none;font-size:15px;padding:10px;margin-top:8px}
+.skipnote{color:var(--ink-soft);font-weight:700;font-size:12.5px;text-align:center;margin-top:12px;line-height:1.4}
+
+input[type=text],input[type=email],textarea{width:100%;font-family:'Nunito';font-size:16px;font-weight:600;padding:13px;border-radius:14px;
+  border:3px solid var(--lilac);background:var(--card);color:var(--ink);margin-top:10px}
+textarea{min-height:90px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--grape)}
+
+/* meter */
+.meter-num{font-family:'Baloo 2';font-size:80px;text-align:center;line-height:1;margin-top:10px}
+.meter-word{text-align:center;font-weight:800;font-size:18px;margin-top:-2px}
+input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36px}
+.scale-ends{display:flex;justify-content:space-between;color:var(--ink-soft);font-weight:800;font-size:12px;margin-top:2px}
+
+/* big tools (fast pick) */
+.bigtool{border-radius:20px;padding:18px;margin-top:12px;cursor:pointer;text-align:center;box-shadow:0 6px 0 var(--shadow);transition:transform .08s,box-shadow .08s;color:#fff}
+.bigtool:active{transform:translateY(4px);box-shadow:0 2px 0 var(--shadow)}
+.bigtool .bt-e{font-size:34px}.bigtool .bt-t{font-family:'Baloo 2';font-weight:700;font-size:18px;margin-top:2px}
+.bigtool.move{background:var(--blue)}.bigtool.dragon{background:var(--tangerine)}.bigtool.water{background:var(--mint);color:#0f4536}.bigtool.helpme{background:var(--grape)}
+
+/* timer ring */
+.timer-ring{position:relative;width:198px;height:198px;margin:14px auto 4px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-count{font-family:'Baloo 2';font-size:56px;color:var(--grape-deep);line-height:1}
+.timer-label{font-weight:800;color:var(--ink-soft);font-size:13px}
+
+/* breathing */
+.breathe-word{font-family:'Baloo 2';font-size:30px;text-align:center;margin-top:18px;min-height:40px;color:var(--blue)}
+.breathe-dot{width:60px;height:60px;border-radius:50%;margin:14px auto;background:radial-gradient(circle at 35% 30%,#fff,var(--blue));box-shadow:0 0 0 10px rgba(91,143,245,.18);transition:transform .2s}
+.breathe-dot.go{animation:breathe 8s ease-in-out infinite}
+@keyframes breathe{0%{transform:scale(1)}45%{transform:scale(2.4)}55%{transform:scale(2.4)}100%{transform:scale(1)}}
+
+/* celebrate */
+.celebrate{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;position:relative;overflow:hidden}
+.celebrate h2{font-size:34px;color:var(--grape-deep)}
+.celebrate .big{font-weight:700;font-size:16px;max-width:330px;margin-top:6px}
+.pointpop{font-family:'Baloo 2';font-size:30px;color:var(--gold);margin-top:12px}
+.ratepair{display:flex;align-items:center;gap:14px;margin-top:12px}
+.ratebubble{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Baloo 2';font-size:24px}
+.arrow{font-size:24px;color:var(--ink-soft)}
+.confetti{position:absolute;top:-12px;width:9px;height:14px}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+@keyframes bubbleRise{to{transform:translateY(-560px)}}
+.gamefield{position:relative;height:54vh;max-height:460px;border:3px solid var(--ink);border-radius:18px;overflow:hidden}
+.gamehud{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-top:10px;font-size:14px}
+.mathprob{text-align:center;padding:12px;background:var(--gold);border:3px solid var(--ink);border-radius:14px;font-family:'Baloo 2';font-weight:800;font-size:28px;margin:8px 0;color:#5a4410}
+
+/* chips + wins */
+.chipwrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:var(--card);border:none;border-radius:999px;padding:9px 13px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 3px 8px var(--shadow);color:var(--ink)}
+.bar{height:16px;border-radius:999px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--mint),var(--grape));transition:width .4s}
+.barrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:800;font-size:13px}
+.barrow .mini{flex:1;height:13px;border-radius:999px;background:rgba(0,0,0,.08);overflow:hidden}
+.barrow .mini>i{display:block;height:100%;background:var(--orchid)}
+.logitem{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:11px;margin-top:8px;box-shadow:0 3px 10px var(--shadow)}
+.lemoji{font-size:22px}.lt{font-weight:800;font-size:14px}.ls{font-size:12px;color:var(--ink-soft);font-weight:700}
+.badge{margin-left:auto;background:var(--lilac);color:var(--grape-deep);font-weight:800;border-radius:999px;padding:5px 9px;font-size:12px}
+.shrinkbox{background:var(--card);border-radius:20px;padding:16px;box-shadow:0 6px 16px var(--shadow);margin-top:12px}
+
+.swatch{width:34px;height:34px;border-radius:10px;border:3px solid #fff;box-shadow:0 2px 6px var(--shadow);flex:none}
+.shopitem{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;padding:12px;box-shadow:0 4px 12px var(--shadow);margin-top:10px}
+.tag{margin-left:auto;border:none;border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:13.5px}
+.tag.buy{background:var(--gold);color:#5a4410}.tag.use{background:var(--mint);color:#0f4536}.tag.on{background:transparent;color:var(--ink-soft)}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="screen"></div>
+
+<script>
+/* =========================================================
+   Pip & Tangle — tester clubhouse (anger + worry)
+   Same spirit as Bubble. Self-contained, saves to this device.
+   ========================================================= */
+const $ = id => document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---- storage: saves on-device (loose file OR hosted) via localStorage;
+   falls back to the Claude app's storage inside the preview, then memory ---- */
+const Store={
+  mode:'mem', mem:{},
+  init(){
+    try{const k='__pt_test__';localStorage.setItem(k,'1');localStorage.removeItem(k);this.mode='local';return;}catch(e){}
+    if(typeof window!=='undefined'&&window.storage&&window.storage.get){this.mode='claude';return;}
+    this.mode='mem';
+  },
+  async load(){try{
+    if(this.mode==='local'){const v=localStorage.getItem('pt_state');return v?JSON.parse(v):null;}
+    if(this.mode==='claude'){const r=await window.storage.get('pt_state');return r?JSON.parse(r.value):null;}
+    return this.mem.s?JSON.parse(this.mem.s):null;
+  }catch(e){return null;}},
+  async save(o){const s=JSON.stringify(o);try{
+    if(this.mode==='local'){localStorage.setItem('pt_state',s);return;}
+    if(this.mode==='claude'){await window.storage.set('pt_state',s);return;}
+    this.mem.s=s;
+  }catch(e){this.mem.s=s;}}
+};
+
+/* ---- state ---- */
+let state=null, flow={}, cachedGreeting=null;
+const MONSTER_SIZES=[140,126,112,100,88,76,64];
+function freshState(){return{
+  name:'', onboarded:false, points:0, totalPoints:0, monsterShrink:0,
+  theme:'grape', wearing:null, owned:{}, unlockedThemes:['grape'],
+  faith:true, pin:'1234', log:[], gratitudes:[], customMantras:[],
+  usedDays:{}, streakCount:0, lastUseDay:''
+};}
+function migrate(s){if(!s)return freshState();const b=freshState();for(const k in b)if(s[k]==null)s[k]=b[k];return s;}
+function save(){Store.save(state);}
+
+/* ---- points / streak / usage ---- */
+const PTS={warning:3,during:2,brave:3,people:2,reflect:1};
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dayOffset(n){const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function recordUsageDay(){const t=todayKey();if(!state.usedDays)state.usedDays={};const first=!state.usedDays[t];state.usedDays[t]=true;
+  if(first){if(state.lastUseDay===dayOffset(1))state.streakCount++;else state.streakCount=1;state.lastUseDay=t;}}
+function currentStreak(){if(state.lastUseDay===todayKey()||state.lastUseDay===dayOffset(1))return state.streakCount||0;return 0;}
+function usageCounts(){const all=state.log.length;let day=0,week=0;const t=todayKey();const wk=Date.now()-7*864e5;
+  state.log.forEach(e=>{const d=new Date(e.ts);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(k===t)day++;if(e.ts>=wk)week++;});
+  return{day,week,all};}
+function award(n){state.points+=n;state.totalPoints+=n;}
+
+/* ---- characters ---- */
+function accessorySVG(id){switch(id){
+  case 'hat':return `<g><ellipse cx="100" cy="50" rx="34" ry="8" fill="#2a1640"/><rect x="78" y="12" width="44" height="40" rx="6" fill="#2a1640"/><rect x="78" y="38" width="44" height="8" fill="var(--grape)"/></g>`;
+  case 'crown':return `<g><path d="M66 48 L74 20 L88 38 L100 14 L112 38 L126 20 L134 48 Z" fill="#ffc23f" stroke="#e8a317" stroke-width="2"/><circle cx="100" cy="28" r="4" fill="#ff5b6e"/><circle cx="78" cy="38" r="3" fill="#5b8ff5"/><circle cx="122" cy="38" r="3" fill="#5b8ff5"/></g>`;
+  case 'bow':return `<g><path d="M100 42 L72 28 L72 56 Z" fill="#ff7ec9"/><path d="M100 42 L128 28 L128 56 Z" fill="#ff7ec9"/><circle cx="100" cy="42" r="9" fill="#ff5b9e"/></g>`;
+  case 'shades':return `<g><rect x="68" y="84" width="26" height="18" rx="6" fill="#2a1640"/><rect x="106" y="84" width="26" height="18" rx="6" fill="#2a1640"/><rect x="94" y="90" width="12" height="4" fill="#2a1640"/></g>`;
+  case 'star':return `<g><path d="M150 44 l4 10 11 1 -8 8 2 11 -9 -6 -9 6 2 -11 -8 -8 11 -1 Z" fill="#ffc23f" stroke="#e8a317" stroke-width="1.5"/></g>`;
+  case 'rainbow':return `<g fill="none" stroke-width="5" stroke-linecap="round" opacity="0.9"><path d="M40 170 Q100 122 160 170" stroke="#ff5b6e"/><path d="M48 174 Q100 134 152 174" stroke="#ffc23f"/><path d="M56 178 Q100 146 144 178" stroke="#3fd6a8"/></g>`;
+  default:return '';}}
+function pipSVG(s){s=s||140;const worn=state&&state.wearing?state.wearing:null;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 200 200">
+  <g>${[0,1,2,3,4].map(i=>{const a=(i/5)*Math.PI*2;const x=100+Math.cos(a)*50,y=100+Math.sin(a)*50;
+    return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="42" ry="29" fill="#9db8ff" opacity="0.5" transform="rotate(${(a*180/Math.PI).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;}).join('')}</g>
+  <circle cx="100" cy="100" r="58" fill="#6e8ff5"/><circle cx="100" cy="100" r="58" fill="url(#psh)"/>
+  <ellipse cx="84" cy="94" rx="8" ry="12" fill="#23305c"/><ellipse cx="116" cy="94" rx="8" ry="12" fill="#23305c"/>
+  <circle cx="87" cy="89" r="3" fill="#fff"/><circle cx="119" cy="89" r="3" fill="#fff"/>
+  <path d="M86 116 Q100 130 114 116" stroke="#23305c" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="74" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/><circle cx="126" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/>
+  <path d="M83 150 L76 172 L97 165 Z" fill="#3fc6a0"/><path d="M117 150 L124 172 L103 165 Z" fill="#3fc6a0"/>
+  ${worn?accessorySVG(worn):''}
+  <defs><radialGradient id="psh" cx="0.36" cy="0.3" r="0.8"><stop offset="0%" stop-color="#d6e2ff" stop-opacity="0.95"/><stop offset="55%" stop-color="#6e8ff5" stop-opacity="0"/></radialGradient></defs></svg>`;}
+function pip(cls,s){return `<div class="char-wrap"><div class="char idle ${cls||''}">${pipSVG(s)}</div></div>`;}
+function tangleSVG(s,mad){s=s||130;mad=(mad==null)?1:mad;const browY=92-mad*8;
+  const mouth=mad>0.45?`M82 138 Q100 124 118 138`:`M84 132 Q100 144 116 132`;
+  return `<svg width="${s}" height="${s}" viewBox="0 0 200 200">
+  <g fill="#e0673a">${[...Array(9)].map((_,i)=>{const a=(i/9)*Math.PI*2;const x2=100+Math.cos(a)*78,y2=100+Math.sin(a)*78,pa=a+0.28,pb=a-0.28;
+    const b1x=100+Math.cos(pa)*54,b1y=100+Math.sin(pa)*54,b2x=100+Math.cos(pb)*54,b2y=100+Math.sin(pb)*54;
+    return `<path d="M${b1x.toFixed(1)} ${b1y.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} L${b2x.toFixed(1)} ${b2y.toFixed(1)} Z"/>`;}).join('')}</g>
+  <circle cx="100" cy="100" r="56" fill="#ff9a4c"/><circle cx="100" cy="100" r="56" fill="url(#tsh)"/>
+  <path d="M70 ${browY} L94 ${browY+14}" stroke="#9a4a1a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M130 ${browY} L106 ${browY+14}" stroke="#9a4a1a" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="84" cy="103" r="9" fill="#fff"/><circle cx="116" cy="103" r="9" fill="#fff"/>
+  <circle cx="84" cy="104" r="4.5" fill="#3a2410"/><circle cx="116" cy="104" r="4.5" fill="#3a2410"/>
+  <path d="${mouth}" stroke="#9a4a1a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <defs><radialGradient id="tsh" cx="0.36" cy="0.3" r="0.85"><stop offset="0%" stop-color="#ffd0a6" stop-opacity="0.9"/><stop offset="55%" stop-color="#ff9a4c" stop-opacity="0"/></radialGradient></defs></svg>`;}
+function tangle(cls,s,mad){return `<div class="char-wrap"><div class="char idle ${cls||''}">${tangleSVG(s,mad)}</div></div>`;}
+function monsterSize(){return MONSTER_SIZES[Math.min(state.monsterShrink,6)];}
+function monsterMad(){return Math.max(0,1-state.monsterShrink*0.16);}
+
+/* ---- content ---- */
+const TOOLS=[
+  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵']},
+  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Squeeze your fists, then let go — 5 times ✊']},
+  {id:'craft',e:'🎨',name:'Craft or read',kind:'list',ideas:['Draw or color something just for fun 🎨','Read a few pages of your book 📖','Build or make a little craft ✂️','Find a cozy spot that is just yours 🛋️']},
+  {id:'calmmind',e:'🌈',name:'Calm my mind',kind:'list',ideas:['Name 5 things you see, 4 you hear, 3 you can touch 👀','Count slowly backwards from 20 🔢','Name every color you can find in the room 🌈','Picture your calm happy place 🏖️']},
+  {id:'balloon',e:'🎈',name:'Balloon breath',kind:'breath'},
+  {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️']},
+  {id:'mantra',e:'💜',name:'Say positive mantras',kind:'mantra'},
+  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Tell Pip exactly what happened 💬','Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️']},
+  {id:'faith',e:'🙏',name:'Prayer or verse',kind:'faith'},
+  {id:'distract',e:'🎲',name:'Distract me',kind:'distract'},
+];
+const MANTRAS=['I can, I can, I know I can.','Big feelings always pass.','This feeling is just a feeling — it will pass.','I am safe right now.','I can do hard things.','I am brave even when I am scared.','I am stronger than my thoughts.','I survived this before. I can do it now.','I am getting stronger every day.','Hard things help me grow.','I can be upset AND still be kind.','I get to choose what happens next.','Mistakes help me learn.','I can ask for help — that is brave too.','I am safe. I am loved. I am okay.','Slow breaths bring me back to calm.','There is always something good to find.','I have done brave things before.'];
+function pickRandom(a){return a[Math.floor(Math.random()*a.length)];}
+const FACTS=["Otters hold hands while they sleep so they don\u2019t drift apart.","Honey never spoils — archaeologists found 3,000-year-old honey that\u2019s still good!","A group of flamingos is called a \u2018flamboyance\u2019.","Octopuses have THREE hearts and BLUE blood.","Bananas are berries, but strawberries aren\u2019t!","A cloud can weigh more than a million pounds.","Cows have best friends and get sad when they\u2019re apart.","Sea otters keep a favorite rock in a little pocket of skin under their arm.","Wombat poop is cube-shaped!","Butterflies taste with their FEET.","Sharks existed before trees did.","There are more stars in space than grains of sand on every beach on Earth.","A jiffy is a real unit of time — one hundredth of a second.","Sloths can hold their breath longer than dolphins can."];
+const JOKES=[{q:'What do you call a sleeping dinosaur?',a:'A dino-snore! 🦕'},{q:'Why did the bicycle fall over?',a:'It was two-tired. 🚲'},{q:'What do you call cheese that isn\u2019t yours?',a:'Nacho cheese! 🧀'},{q:'Why did the math book look sad?',a:'It had too many problems. 📓'},{q:'What\u2019s orange and sounds like a parrot?',a:'A carrot. 🥕'},{q:'Why can\u2019t you give Elsa a balloon?',a:'Because she\u2019ll let it go. 🎈'},{q:'What do you call a bear with no teeth?',a:'A gummy bear! 🐻'},{q:'Why did the cookie go to the doctor?',a:'It was feeling crumb-y. 🍪'},{q:'What do you call a fish wearing a bowtie?',a:'So-fish-ticated. 🐟'},{q:'How do you make a tissue dance?',a:'You put a little boogie in it! 💃'},{q:'What did the ocean say to the beach?',a:'Nothing — it just waved. 🌊'},{q:'Why did the banana go to the party?',a:'Because it was a-peel-ing! 🍌'},{q:'What\u2019s a cloud\u2019s favorite drink?',a:'Thunder-ade. ⛈️'},{q:'Why did the scarecrow win an award?',a:'He was out-standing in his field. 🌾'},{q:'What do you call a dog magician?',a:'A labra-cadabra-dor. 🐶'}];
+const TD_THOUGHTS=['They did that on purpose','Nobody likes me','I can\u2019t do this','Everyone is mad at me','Something bad will happen','It\u2019s not fair'];
+const TD_SURE=['Totally true','Probably true','Not sure','Probably not true','I\u2019d have to ask'];
+const TD_REFRAMES=['Maybe it was an accident','Maybe they were busy or didn\u2019t notice','Maybe they had a hard day too','I could just ask instead of guessing','It might not even be about me','It\u2019s not as big as it feels right now'];
+let td={};
+const WARN=[{e:'🥵',t:'My face feels hot'},{e:'😠',t:'I want to yell'},{e:'😟',t:'My tummy feels worried'},{e:'💓',t:'My heart is racing'},{e:'😢',t:'Tears are coming'},{e:'🌪️',t:'Everything feels like too much'}];
+const FEARS=[
+  {e:'🌙',t:'The dark / bedtime'},
+  {e:'⛈️',t:'Thunderstorms'},
+  {e:'🔊',t:'Loud noises (fireworks, alarms)'},
+  {e:'🐶',t:'Dogs or other animals'},
+  {e:'🐛',t:'Bugs or spiders'},
+  {e:'🧍',t:'Being away from my grown-up'},
+  {e:'🛌',t:'Sleeping somewhere new'},
+  {e:'🗣️',t:'Speaking up or raising my hand'},
+  {e:'🆕',t:'Trying something new'},
+  {e:'🤢',t:'Getting sick or throwing up'},
+  {e:'💉',t:'Doctors, dentists, or shots'},
+  {e:'😬',t:'Making a mistake'},
+];
+const FAITH=[
+  {msg:'Even the tiniest sparrow is watched over and cared for — and you matter so much more than a sparrow. You are never alone with a big feeling.',ref:'a gentle old promise'},
+  {msg:'You can be brave and strong, because you are not carrying this by yourself. Help is always near.',ref:'a verse about courage'},
+  {msg:'When your heart feels heavy, you can hand the worry over and rest. You don\u2019t have to hold it all.',ref:'a verse about peace'},
+];
+const PEOPLE=[
+  {s:'Your friend laughed when you tripped, then said "you okay?" and helped you up.',best:'joke',note:'They laughed, but they checked on you and helped — that points to a friendly laugh, not a mean one.'},
+  {s:'Two friends were whispering and looked over at you.',best:'unsure',note:'This one is really hard to know! Whispering near you could be about anything. When you can\u2019t tell, you can ask instead of guessing the worst.'},
+  {s:'You said hi and your friend walked right past without answering.',best:'busy',note:'They might not have heard you, or had a lot on their mind. People miss things — it usually isn\u2019t about you.'},
+  {s:'Someone bumped your tower and it fell, then said "oh no, sorry!"',best:'accident',note:'It fell — but "sorry" and "oh no" tell you they didn\u2019t mean to.'},
+  {s:'A kid said "your shoes are... interesting" and smirked, and kept going after you went quiet.',best:'unkind',note:'A friendly joke STOPS when it stops being fun for you. Going on after you went quiet crossed a line — your feelings about that are right.'},
+  {s:'A friend said "I really like Emily\u2019s drawing."',best:'kind',note:'That\u2019s a kind thing said about someone else — not a put-down of you. Liking one thing doesn\u2019t mean disliking yours.'},
+];
+const BUCKETS=[{id:'joke',e:'😄',l:'A friendly joke'},{id:'accident',e:'🤷',l:'An accident'},{id:'busy',e:'🌀',l:'They were busy'},{id:'kind',e:'💛',l:'Something kind'},{id:'unsure',e:'🤔',l:'Hard to tell — I could ask'},{id:'unkind',e:'💔',l:'That was actually unkind'}];
+function feelWord(v){if(v<=1)return['Calm','#3fd6a8'];if(v<=3)return['A little bugged','#7fce6a'];if(v<=5)return['Frustrated','#ffc23f'];if(v<=7)return['Pretty big','#ff8a3f'];if(v<=9)return['Really big','#ff5b6e'];return['Huge','#e23a5e'];}
+
+/* ---- timer ---- */
+const Timer={iv:null,start(secs,onTick,onDone){this.stop();const total=secs;let start=Date.now();onTick(secs,total);
+  this.iv=setInterval(()=>{const rem=Math.max(0,Math.round(total-(Date.now()-start)/1000));onTick(rem,total);if(rem<=0){this.stop();onDone&&onDone();}},250);},
+  stop(){if(this.iv){clearInterval(this.iv);this.iv=null;}}};
+
+/* ---- nav ---- */
+const screen=$('screen');let currentView='home',stack=[];
+function setTheme(){document.documentElement.setAttribute('data-theme',state.theme==='grape'?'':state.theme);}
+function go(view,d){Timer.stop();stopGames();if(view==='home')cachedGreeting=null;currentView=view;stack.push({view,d});(renderers[view]||renderers.home)(d);window.scrollTo(0,0);}
+function goBack(){Timer.stop();stopGames();if(stack.length>1)stack.pop();const c=stack[stack.length-1];currentView=c.view;(renderers[c.view]||renderers.home)(c.d);window.scrollTo(0,0);}
+function topbar(){return `<div class="toprow">${currentView!=='home'?'<button class="back" onclick="goBack()">‹</button>':'<div style="width:42px"></div>'}<div class="spacer"></div><div class="pointchip">⭐ ${state.points}</div></div>`;}
+
+const renderers={};
+
+/* ---- onboarding (two steps: meet Pip + name, then meet Tangle) ---- */
+renderers.onboard=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:6vh;text-align:center">
+  <span class="step-tag">WELCOME 👋</span>
+  <div class="duo" style="margin-top:12px">${pip('',172)}</div>
+  <div class="step-title" style="font-size:32px;margin-top:4px">Hi! I\u2019m Pip.</div>
+  <div class="step-sub" style="max-width:300px;margin:8px auto 0">I\u2019m your buddy for big feelings — big mad OR big worry. We\u2019ll take things one small step at a time, together.</div>
+  <div class="card" style="margin-top:20px">
+    <h3 style="text-align:center">What should I call you?</h3>
+    <input id="nm" type="text" placeholder="Type your name" maxlength="18">
+    <button class="btn" onclick="doStart()">Nice to meet you! ›</button>
+  </div>
+  <div class="skipnote">Saves only on this device.</div></div>`;
+  $('nm').focus();$('nm').addEventListener('keydown',e=>{if(e.key==='Enter')doStart();});};
+function doStart(){state.name=($('nm').value||'').trim().slice(0,18);state.onboarded=true;save();go('meetTangle');}
+renderers.meetTangle=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:6vh;text-align:center">
+  <span class="step-tag">MEET TANGLE 🧡</span>
+  <div class="duo" style="margin-top:14px">${tangle('',150,1)}</div>
+  <div class="step-title" style="font-size:28px;margin-top:4px">This is Tangle.</div>
+  <div class="card"><p>Tangle is the <b>big feeling</b> — the mad, the worried, the too-much. Tangle isn\u2019t bad! Every time you practice with me, Tangle gets <b>calmer and smaller</b>. 🌟</p></div>
+  <div class="duo" style="margin-top:12px">${pip('happy',96)}</div>
+  <button class="btn" onclick="go('home')">Let\u2019s go to the clubhouse ›</button></div>`;};
+
+/* ---- greeting ---- */
+function greeting(streak,u){const p=["Hi, I\u2019m <b>Pip</b>. I\u2019m so glad you came today.","Hey friend — whatever today is, I\u2019m right here with you.","We can take this one moment at a time, together."];
+  if(streak>=3)p.push(`That\u2019s <b>${streak} days in a row</b> you\u2019ve come back. Showing up like that is real.`);
+  if(u.week>=5)p.push(`You\u2019ve used your tools <b>${u.week} times this week</b>. You keep trying, even when it\u2019s hard.`);
+  if(state.totalPoints>=40)p.push("Look at all you\u2019ve practiced. The brave you is growing every day.");
+  if(state.log.length){const l=state.log[0];if(l.section==='brave')p.push("Last time you took a brave step. That stays with you.");
+    if(l.rateAfter!=null&&l.rateBefore!=null&&l.rateAfter<l.rateBefore)p.push("Last time, your feeling came down. That was your hard work — not magic.");}
+  return p[Math.floor(Math.random()*p.length)];}
+
+/* ---- home ---- */
+renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cachedGreeting)cachedGreeting=greeting(streak,u);
+  screen.innerHTML=`<div class="toprow"><div class="streakpill" title="day streak">🔥 ${streak}</div><div class="spacer"></div><div class="pointchip">⭐ ${state.points}</div></div>
+  <div class="pad fade"><div style="text-align:center"><div class="hero-name">Pip &amp; Tangle</div><div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
+    <div class="duo" style="margin-top:4px">${pip('',120)}</div>
+    <div class="speech">${cachedGreeting}</div>
+    <div class="statrow">
+      <div class="statcard"><div class="statnum">${u.day}</div><div class="statlbl">TODAY</div></div>
+      <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
+      <div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">ALL TIME</div></div></div>
+    <div style="height:6px"></div>
+    <button class="door before" onclick="go('feelComing')"><div class="emoji">🌤️</div><div><div class="dt">I feel it coming</div><div class="ds">Catch a big feeling early</div></div></button>
+    <button class="door during" onclick="go('helpNow')"><div class="emoji">🔥</div><div><div class="dt">I need help NOW</div><div class="ds">It\u2019s big right now</div></div></button>
+    <button class="door brave" onclick="go('bravePick')"><div class="emoji">🦁</div><div><div class="dt">Be brave</div><div class="ds">Do a scary thing, one tiny step</div></div></button>
+    <button class="door people" onclick="go('detectiveHub')"><div class="emoji">🔍</div><div><div class="dt">Be a Detective</div><div class="ds">Read people &amp; check tricky thoughts</div></div></button>
+    <button class="door gratitude" onclick="go('sunshine')"><div class="emoji">☀️</div><div><div class="dt">Sunshine</div><div class="ds">Good things &amp; a reminder you\u2019re loved</div></div></button>
+    <div class="minirow">
+      <button class="minicard" onclick="go('wins')"><div class="mi">🏆</div><div class="ml">My Wins</div></button>
+      <button class="minicard ${state.wearing?'wearing':''}" onclick="go('closet')"><div class="mi">🎩</div><div class="ml">Closet</div></button>
+      <button class="minicard" onclick="go('colors')"><div class="mi">🎨</div><div class="ml">Colors</div></button>
+      <button class="minicard" onclick="go('gate')"><div class="mi">🔒</div><div class="ml">Grown-Ups</div></button></div></div>`;};
+
+/* ---- rate ---- */
+renderers.rate=(d)=>{const after=d.when==='after';const start=after?Math.max(0,(flow.rateBefore!=null?flow.rateBefore:5)-2):5;
+  const [tag,title]=after?['HOW BIG IS IT NOW?','How big is the feeling now?']:['HOW BIG IS IT?','How big does it feel?'];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
+    <span class="step-tag">${tag}</span><div class="step-title">${title}</div>
+    <div class="step-sub">${after?'You used your skill — let\u2019s see what changed.':'Slide to show how strong it feels.'}</div>
+    <div class="duo" style="margin:6px auto">${tangle('',96,after?monsterMad():1)}</div>
+    <div class="meter-num" id="mnum">${start}</div><div class="meter-word" id="mword"></div>
+    <input type="range" min="0" max="10" value="${start}" id="sl" oninput="updMeter()">
+    <div class="scale-ends"><span>0 · calm</span><span>10 · biggest</span></div>
+    ${after&&flow.rateBefore!=null?`<div class="card"><p>Before, you said it was <b>${flow.rateBefore}</b>.</p></div>`:''}
+    <button class="btn" onclick="rateDone('${d.when}')">${after?'That\u2019s how I feel now':'That\u2019s how it feels'}</button></div>`;
+  updMeter();};
+function updMeter(){const v=+$('sl').value,[w,c]=feelWord(v);$('mnum').textContent=v;$('mnum').style.color=c;$('mword').textContent=w;$('mword').style.color=c;}
+function rateDone(when){const v=+$('sl').value;if(when==='after'){flow.rateAfter=v;finishFlow();}else{flow.rateBefore=v;
+  if(flow.section==='brave')go('braveCalm');else if(flow.section==='feelComing')go('earlyPick');else go('helpPick');}}
+
+/* ---- 1) I FEEL IT COMING ---- */
+renderers.feelComing=()=>{flow={section:'feelComing'};screen.innerHTML=`${topbar()}<div class="pad fade">
+  <span class="step-tag">CATCH IT EARLY 🌤️</span><div class="step-title">What are you noticing?</div>
+  <div class="step-sub">You opened the app early — that\u2019s a big win already! 🌟</div>
+  ${WARN.map((w,i)=>`<button class="choice" onclick="pickWarn(${i})"><span class="ce">${w.e}</span>${esc(w.t)}</button>`).join('')}</div>`;};
+function pickWarn(i){flow.warn=WARN[i].t;go('rate',{when:'now'});}
+renderers.earlyPick=()=>{const sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'👀',t:'Name 5 things I can see',id:'do'},{e:'🛋️',t:'Go to a calm spot',id:'do'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'do'}];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PICK ONE QUICK THING</span><div class="step-title">Catch it before it grows</div>
+  ${sk.map((s,i)=>`<button class="choice" onclick="earlyDo(${i})"><span class="ce">${s.e}</span>${esc(s.t)}</button>`).join('')}</div>`;
+  window._early=sk;};
+function earlyDo(i){const s=window._early[i];flow.tool=s.t;if(s.id==='balloon')go('breathe',{next:'afterEarly'});else simpleDo(s.e,s.t,'afterEarly');}
+function afterEarly(){go('rate',{when:'after'});}
+function simpleDo(e,label,nextFn){screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
+  <span class="step-tag">TRY IT</span><div style="font-size:48px;margin-top:14px">${e}</div><div class="step-title">${esc(label)}</div>
+  <div class="card"><p>Go ahead and do it now. Pip is waiting right here. 💜</p></div>
+  <div class="duo" style="margin:8px auto">${pip('',104)}</div>
+  <button class="btn go" onclick="${nextFn}()">I did it! ✅</button></div>`;}
+
+/* ---- 2) I NEED HELP NOW ---- */
+renderers.helpNow=()=>{flow={section:'helpNow'};go('rate',{when:'now'});};
+renderers.helpPick=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
+  <span class="step-tag" style="background:#ffd6c2;color:#c8530f">PICK FAST 🔥</span><div class="step-title">Let\u2019s get your body to calm down</div>
+  <div class="bigtool move" onclick="pickTool('move')"><div class="bt-e">🛼</div><div class="bt-t">MOVE</div></div>
+  <div class="bigtool dragon" onclick="pickTool('balloon')"><div class="bt-e">🎈</div><div class="bt-t">BALLOON BREATH</div></div>
+  <div class="bigtool water" onclick="pickTool('water')"><div class="bt-e">🧊</div><div class="bt-t">COLD WATER</div></div>
+  <div class="bigtool helpme" onclick="justHelp()"><div class="bt-e">💜</div><div class="bt-t">I CAN\u2019T PICK — JUST HELP</div></div>
+  <button class="btn ghost" onclick="go('toolList')">Show all my tools</button></div>`;};
+function justHelp(){flow.tool=TOOLS.find(t=>t.id==='balloon');go('breathe',{next:'afterTool'});}
+renderers.toolList=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY TOOLS 🧰</span><div class="step-title">Pick any tool</div>
+  ${TOOLS.map(t=>`<button class="choice" onclick="pickTool('${t.id}')"><span class="ce">${t.e}</span>${esc(t.name)}</button>`).join('')}</div>`;};
+function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
+  if(t.kind==='breath')go('breathe',{next:'afterTool'});else if(t.kind==='mantra')go('mantra');else if(t.kind==='faith')go('faithTool');else if(t.kind==='distract')go('distract');else go('doTool',{id});}
+renderers.doTool=(d)=>{const t=TOOLS.find(x=>x.id===d.id);const idea=t.ideas[Math.floor(Math.random()*t.ideas.length)];const secs=t.id==='move'?60:45;const circ=2*Math.PI*86;
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">${esc(t.name.toUpperCase())}</span><div class="step-title">Your mission:</div>
+  <div class="card"><h3 style="margin:0;text-align:center">${esc(idea)}</h3></div>
+  <div class="timer-ring"><svg width="198" height="198"><circle cx="99" cy="99" r="86" stroke="var(--lilac)" stroke-width="20" fill="none"/>
+    <circle id="tp" cx="99" cy="99" r="86" stroke="var(--grape)" stroke-width="20" fill="none" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="0"/></svg>
+    <div class="timer-mid"><div class="timer-count" id="tc">${secs}</div><div class="timer-label">seconds</div></div></div>
+  <div>${pip('',92)}</div><div style="font-weight:800;color:var(--ink-soft);font-size:13px">Pip is doing it with you!</div>
+  <button class="btn go" id="db" onclick="afterTool()">I did it! ✅</button>
+  <button class="btn ghost" onclick="Timer.stop();go('toolList')">Try a different tool</button></div>`;
+  Timer.start(secs,(rem,total)=>{const tc=$('tc'),tp=$('tp');if(tc)tc.textContent=rem>0?rem:'⭐';if(tp)tp.style.strokeDashoffset=circ*(1-rem/total);},()=>{const b=$('db');if(b)b.textContent='All done! Tap here ✅';});};
+function afterTool(){Timer.stop();go('moreHelp');}
+renderers.moreHelp=()=>{if(!flow.tried)flow.tried=0;flow.tried++;const suggest=flow.tried>=3;
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">HOW ARE YOU?</span><div class="step-title">How are you feeling now?</div>
+  <div class="step-sub">${flow.tried>1?`You\u2019ve tried ${flow.tried} tools — that\u2019s hard work!`:'You used a tool — nice job!'}</div>
+  <div class="duo" style="margin:8px auto">${pip('',96)}</div>
+  <button class="choice" onclick="go('rate',{when:'after'})"><span class="ce">😌</span>I feel better — let\u2019s check it</button>
+  <button class="choice" onclick="moreTool()"><span class="ce">🔁</span>I need more help — try another tool</button>
+  ${suggest?`<div class="card tip" style="margin-top:14px"><h3 style="margin:0">💜 You\u2019re working so hard.</h3><p>Big feelings sometimes need a grown-up, not just a tool. Want to find someone who can be with you?</p>
+    <button class="btn" style="margin-top:8px" onclick="helpGrownUp()">Yes — I\u2019ll find a grown-up 🤗</button></div>`:''}
+  <div class="skipnote">Whatever you pick is okay. There\u2019s no wrong answer. 💜</div></div>`;};
+function moreTool(){flow.tool=null;go('toolList');}
+function helpGrownUp(){flow.gotGrownUp=true;go('rate',{when:'after'});}
+
+/* ---- breathe (balloon) ---- */
+renderers.breathe=(d)=>{const next=d.next||'afterTool';
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">BALLOON BREATH 🎈</span>
+  <div class="step-title">Breathe with the balloon</div><div class="step-sub">Breathe in to fill it up… slow breath out to let it go.</div>
+  <div class="breathe-word" id="bw">Get ready…</div><div class="breathe-dot" id="bd"></div>
+  <div style="font-weight:800;color:var(--ink-soft)" id="bc">3 breaths to go</div>
+  <button class="btn go" onclick="${next}()">I feel calmer ✅</button></div>`;
+  let cyc=3;const w=$('bw'),c=$('bc'),dot=$('bd');
+  setTimeout(()=>{if(dot)dot.classList.add('go');const tick=()=>{if($('bw')){w.textContent='Breathe in 🌬️';w.style.color='var(--blue)';}
+    setTimeout(()=>{if($('bw')){w.textContent='Hold…';w.style.color='var(--grape)';}},4000);
+    setTimeout(()=>{if($('bw')){w.textContent='Breathe out 🎈';w.style.color='var(--tangerine)';}},4600);};tick();
+    const iv=setInterval(()=>{cyc--;if(cyc<=0){clearInterval(iv);if($('bw')){w.textContent='Great job! 💜';w.style.color='var(--mint)';}if($('bc'))c.textContent='You did it!';return;}
+      if($('bc'))c.textContent=cyc+' breath'+(cyc>1?'s':'')+' to go';tick();},8000);},900);};
+
+/* ---- mantra / faith tool ---- */
+renderers.mantra=()=>{const all=MANTRAS.concat(state.customMantras||[]);
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">POSITIVE MANTRAS 💜</span><div class="step-title">Say it strong</div>
+  <div class="step-sub">Tap one and say it out loud — like you mean it!</div>
+  ${all.map(m=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">💜</span>${esc(m)}</button>`).join('')}
+  <button class="btn ghost" onclick="$('mbox').style.display='block';this.style.display='none';$('ownm').focus()">+ write my own mantra</button>
+  <div id="mbox" style="display:none"><input id="ownm" type="text" placeholder="Write your very own mantra…" maxlength="80"></div>
+  <button class="btn go" onclick="saveMantraMaybe();afterTool()">I said it! ✅</button></div>`;};
+function saveMantraMaybe(){const b=$('ownm');if(b&&b.value.trim().length>1){if(!state.customMantras)state.customMantras=[];state.customMantras.push(b.value.trim().slice(0,80));save();}}
+renderers.faithTool=()=>{if(!state.faith){afterTool();return;}const m=FAITH[Math.floor(Math.random()*FAITH.length)];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">A QUIET MOMENT 💛</span>
+  <div class="duo" style="margin:14px auto 6px">${pip('',110)}</div>
+  <div class="card" style="background:#fff8e1;text-align:left"><p style="font-size:15.5px;line-height:1.55">${esc(m.msg)}</p>
+    <p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:10px;text-align:center">— ${esc(m.ref)}</p></div>
+  <button class="btn go" onclick="afterTool()">Amen 💜</button></div>`;};
+
+/* ---- 3) BE BRAVE ---- */
+renderers.bravePick=()=>{flow={section:'brave'};screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE BRAVE 🦁</span>
+  <div class="step-title">What feels scary?</div><div class="step-sub">Brave doesn\u2019t mean not scared. It means trying anyway. 💪</div>
+  ${FEARS.map((f,i)=>`<button class="choice" onclick="pickFear(${i})"><span class="ce">${f.e}</span>${esc(f.t)}</button>`).join('')}
+  <div class="step-sub" style="margin-top:16px">Something else? Type it here:</div>
+  <input id="fx" type="text" placeholder="What feels scary…" maxlength="40">
+  <button class="btn ghost" onclick="pickFearCustom()">Use my own ›</button></div>`;};
+function pickFear(i){flow.fear=FEARS[i].t;go('rate',{when:'now'});}
+function pickFearCustom(){const v=($('fx').value||'').trim();if(!v){$('fx').focus();return;}flow.fear=v.slice(0,40);go('rate',{when:'now'});}
+renderers.braveCalm=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">ONE SMALL STEP</span>
+  <div class="step-title">Comfort first 💜</div><div class="card"><p>First, let\u2019s get calm together. Take a balloon breath with Pip. Then we\u2019ll try just <b>one small brave step</b> — only if you\u2019re ready.</p></div>
+  <div style="margin:8px 0">${pip('',104)}</div>
+  <button class="btn" onclick="go('breathe',{next:'braveDo'})">🎈 Calm down first</button>
+  <button class="btn go" onclick="braveDo()">I\u2019m ready for a brave step ›</button></div>`;};
+function braveDo(){screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">YOUR BRAVE STEP</span>
+  <div class="step-title">Pick one tiny step</div><div class="step-sub">Not the whole scary thing — just a small next step you choose.</div>
+  ${['Talk about it with someone I trust','Look at a picture of it','Get a little closer for 10 seconds','Try it with someone next to me','Make a cozy plan for next time'].map(t=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">🦁</span>${esc(t)}</button>`).join('')}
+  <button class="btn go" onclick="go('rate',{when:'after'})">I did my brave step! ✅</button>
+  <div class="skipnote">It\u2019s okay if you\u2019re not ready today. Coming back is brave too. 💜</div></div>`;}
+
+/* ---- 4) BE A DETECTIVE (hub: People Detective + Thought Detective) ---- */
+renderers.detectiveHub=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE A DETECTIVE 🔍</span>
+  <div class="step-title">Two kinds of detective work</div><div class="duo" style="margin:6px auto">${pip('',104)}</div>
+  <div class="card"><p>Our brain makes fast <b>guesses</b> — about other people, and about our own worried or mad thoughts. A good detective checks if they\u2019re really true.</p></div>
+  <button class="door people" onclick="go('peopleStart')"><div class="emoji">🧩</div><div><div class="dt">People Detective</div><div class="ds">Mean? joke? accident? Read the clues</div></div></button>
+  <button class="door before" onclick="go('thoughtStart')"><div class="emoji">🔎</div><div><div class="dt">Thought Detective</div><div class="ds">Check if a worried or mad thought is true</div></div></button></div>`;};
+
+renderers.thoughtStart=()=>{flow={section:'thought'};td={thought:'',sure:'',reframes:[]};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">THOUGHT DETECTIVE 🔎</span>
+  <div class="step-title">What\u2019s the tricky thought?</div><div class="duo" style="margin:4px auto">${pip('',92)}</div>
+  <div class="step-sub">A worried or mad thought that\u2019s bugging you. Tap one, or type your own.</div>
+  ${TD_THOUGHTS.map((t,i)=>`<button class="choice" onclick="tdPick(${i})"><span class="ce">💭</span>${esc(t)}</button>`).join('')}
+  <input id="tdt" type="text" placeholder="…or type the thought" maxlength="60">
+  <button class="btn" onclick="tdNext()">Next ›</button></div>`;};
+function tdPick(i){$('tdt').value=TD_THOUGHTS[i];}
+function tdNext(){td.thought=($('tdt').value||'').trim().slice(0,60);go('tdSure');}
+renderers.tdSure=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">CHECK THE CLUE 🔎</span>
+  <div class="step-title">How sure are you it\u2019s true?</div>
+  ${td.thought?`<div class="card"><p>The thought: <b>${esc(td.thought)}</b></p></div>`:''}
+  ${TD_SURE.map((t,i)=>`<button class="choice" onclick="td.sure=TD_SURE[${i}];go('tdReframe')"><span class="ce">🔎</span>${esc(t)}</button>`).join('')}</div>`;};
+renderers.tdReframe=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">LOOK FOR OTHER CLUES 💡</span>
+  <div class="step-title">What else could be true?</div>
+  <div class="step-sub">A good detective looks at every angle. Tap any that could fit.</div>
+  ${TD_REFRAMES.map(t=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">💡</span>${esc(t)}</button>`).join('')}
+  <button class="btn go" onclick="finishFlow()">I cracked the case ✅</button></div>`;};
+
+/* ---- 4b) PEOPLE PRACTICE ---- */
+renderers.peopleStart=()=>{flow={section:'people',used:[],round:0};screen.innerHTML=`${topbar()}<div class="pad fade">
+  <span class="step-tag">PEOPLE PRACTICE 🧩</span><div class="step-title">Reading people — your superpower</div>
+  <div class="duo" style="margin:6px auto">${pip('',104)}</div>
+  <div class="card"><p>When something happens with friends, our mind makes a fast <b>guess</b> about why. Sometimes Tangle jumps in with "they were being mean!" — but lots of times it\u2019s something else entirely. Let\u2019s practice.</p></div>
+  <button class="btn" onclick="peopleRound()">Start practicing ›</button>
+  <div class="card tip"><p>💜 "That was actually unkind" is always okay to pick. If it WAS unkind, your feelings are right.</p></div></div>`;};
+function peopleRound(){let pool=PEOPLE.map((_,i)=>i).filter(i=>!flow.used.includes(i));if(!pool.length){pool=PEOPLE.map((_,i)=>i);flow.used=[];}
+  const idx=pool[Math.floor(Math.random()*pool.length)];flow.used.push(idx);flow.scene=idx;
+  const sc=PEOPLE[idx];screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT\u2019S GOING ON? · ${flow.round+1} of 3</span>
+  <div class="card"><p style="font-size:16px">${esc(sc.s)}</p></div>
+  <div class="step-sub" style="margin-top:14px">What might be happening? Tap your best guess:</div>
+  ${BUCKETS.map(b=>`<button class="choice" onclick="peoplePick('${b.id}')"><span class="ce">${b.e}</span>${esc(b.l)}</button>`).join('')}</div>`;}
+function peoplePick(id){const sc=PEOPLE[flow.scene];const good=id===sc.best;
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">${good?'GREAT READING 🌟':'GOOD THINKING 💜'}</span>
+  <div class="duo" style="margin:8px auto">${pip('happy',104)}</div>
+  <div class="card" style="text-align:left"><p>${sc.note}</p></div>
+  ${id==='unkind'&&sc.best!=='unkind'?`<div class="card tip"><p>And remember — if something ever DOES feel unkind, trusting that feeling is okay too. You can always tell a grown-up.</p></div>`:''}
+  ${flow.round<2?`<button class="btn" onclick="flow.round++;peopleRound()">Next situation ›</button>`:`<button class="btn go" onclick="finishFlow()">I\u2019m done — nice work! ✅</button>`}</div>`;}
+
+/* ---- 5) SUNSHINE ---- */
+renderers.sunshine=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">SUNSHINE ☀️</span>
+  <div class="step-title">A little warmth</div><div class="duo" style="margin:6px auto">${pip('',104)}</div>
+  <div class="card"><p>Two things you can do here — pick whichever fits today.</p></div>
+  <button class="door before" onclick="go('gratWrite')"><div class="emoji">🌻</div><div><div class="dt">Good things</div><div class="ds">Notice something good from your day</div></div></button>
+  ${state.faith?`<button class="door gratitude" onclick="go('faithMoment')"><div class="emoji">💛</div><div><div class="dt">Remind me I\u2019m loved</div><div class="ds">A quiet moment</div></div></button>`:''}
+  ${state.gratitudes.length?`<div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">Things you\u2019ve noticed</div>
+    ${state.gratitudes.slice(0,4).map(g=>g.type==='faith'?`<div class="card" style="background:#fff8e1;display:flex;gap:10px;align-items:center"><div style="font-size:20px">💛</div><div style="font-size:13px;font-weight:700;color:var(--ink-soft)">${esc(new Date(g.ts).toLocaleDateString())} · Amen 💜</div></div>`:`<div class="card" style="background:#fffaef"><div style="font-size:11px;font-weight:800;color:var(--ink-soft)">${esc(new Date(g.ts).toLocaleDateString())}</div><div style="font-weight:700;margin-top:3px">🌻 ${esc(g.text)}</div></div>`).join('')}`:''}</div>`;};
+renderers.gratWrite=()=>{const chips=['I felt happy when…','Someone was kind when…','I\u2019m thankful for…','Something fun today was…','A person I love is…','My body felt good when…'];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GOOD THINGS 🌻</span>
+  <div class="step-title">Tell me about a good part of your day</div><div class="duo" style="margin:4px auto">${pip('',92)}</div>
+  <div class="step-sub">Just one thing. Big or small — they all count.</div>
+  <textarea id="gt" placeholder="Type your good thing here…"></textarea>
+  <div class="step-sub" style="margin-top:12px">Need a starter? Tap one:</div>
+  <div class="chipwrap">${chips.map(c=>`<button class="chip" onclick="gratStart('${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join('')}</div>
+  <button class="btn" onclick="gratSave()">Save my good thing 🌻</button>
+  <div class="skipnote">No pressure. Some days are easier than others — both are okay. 💜</div></div>`;};
+function gratStart(t){const b=$('gt');if(!b)return;b.value=b.value.trim()?b.value.trim()+' '+t+' ':t+' ';b.focus();b.selectionStart=b.selectionEnd=b.value.length;}
+function gratSave(){const b=$('gt');const t=b?b.value.trim():'';if(!t){go('home');return;}state.gratitudes.unshift({ts:Date.now(),text:t,type:'gratitude'});award(1);recordUsageDay();save();
+  gentleCeleb('🌻 ✨ 🌻','Thank you for sharing.',`"${esc(t)}"`,'Noticing good things is its own kind of brave. 💜');}
+renderers.faithMoment=()=>{const m=FAITH[Math.floor(Math.random()*FAITH.length)];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">A QUIET MOMENT 💛</span>
+  <div class="duo" style="margin:16px auto 6px">${pip('',120)}</div>
+  <div class="card" style="background:#fff8e1;text-align:left"><p style="font-size:16px;line-height:1.55;font-weight:600">${esc(m.msg)}</p>
+    <p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:12px;text-align:center">— ${esc(m.ref)}</p></div>
+  <button class="btn" onclick="faithAmen()">Amen 💜</button></div>`;};
+function faithAmen(){state.gratitudes.unshift({ts:Date.now(),type:'faith'});award(1);recordUsageDay();save();
+  gentleCeleb('💛 ✨ 💛','Amen.','You are loved. Always. 💜','');}
+function gentleCeleb(top,title,big,sub){screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:30px">${top}</div>
+  <h2>${title}</h2><div class="duo" style="margin:10px 0">${pip('happy',104)}</div>
+  <div class="big" style="font-size:16px">${big}</div>${sub?`<div class="big" style="margin-top:8px;font-size:14px">${sub}</div>`:''}
+  <div class="pointpop">+1 ⭐</div>
+  <button class="btn" style="max-width:260px" onclick="go('home')">Back home</button>
+  <button class="btn ghost" style="max-width:260px" onclick="go('sunshine')">Back to Sunshine</button></div>`;burst();}
+
+/* ---- finish + celebrate ---- */
+function finishFlow(){const mode=flow.section==='feelComing'?'warning':flow.section==='helpNow'?'during':flow.section==='brave'?'brave':(flow.section==='people'||flow.section==='thought')?'people':'reflect';
+  const pts=PTS[mode]||1;award(pts);if(state.monsterShrink<6)state.monsterShrink++;recordUsageDay();
+  const entry={ts:Date.now(),section:flow.section,title:flow.warn||flow.fear||(flow.section==='helpNow'?'Got help with a big feeling':flow.section==='people'?'Practiced reading people':flow.section==='thought'?(td.thought?('Checked: "'+td.thought+'"'):'Checked a tricky thought'):'A moment'),
+    tool:flow.tool?(flow.tool.name||flow.tool):'',rateBefore:flow.rateBefore!=null?flow.rateBefore:null,rateAfter:flow.rateAfter!=null?flow.rateAfter:null,gotGrownUp:!!flow.gotGrownUp,pts};
+  state.log.unshift(entry);if(state.log.length>300)state.log=state.log.slice(0,300);save();go('celebrate',{entry,pts});}
+renderers.celebrate=(d)=>{const e=d.entry;const pair=e.rateBefore!=null&&e.rateAfter!=null;const dropped=pair&&e.rateAfter<e.rateBefore;const calm=e.rateAfter!=null&&e.rateAfter<4;
+  const labels={feelComing:'You caught a warning sign early!',helpNow:'You used the app while it was big!',brave:'You took a brave step!',people:'You practiced reading people!',thought:'You were a thought detective!'};
+  const emo={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎'}[e.section]||'⭐';
+  let spec=pair&&dropped?`You came to me at a ${e.rateBefore}, and came down to a ${e.rateAfter}. That took real work.`
+    :e.section==='feelComing'?'You caught a warning sign before it got big. That\u2019s the thoughtful you in action.'
+    :e.section==='brave'?'You did a brave step today. That\u2019s yours, and no one can take it from you.'
+    :e.section==='people'?'You looked at a tricky moment in a fair, kind way. That\u2019s a real skill.'
+    :e.section==='thought'?'You checked the clues instead of believing the first thought. A thought is not a fact!'
+    :'You showed up. That is the work, and you did it.';
+  screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:26px">${emo} 🎉 ${emo}</div>
+    <h2>Way to go!</h2><div class="big" style="font-weight:800;color:var(--grape)">${esc(labels[e.section]||'Great job!')}</div>
+    <div class="duo" style="margin:8px 0">${pip('happy',92)}${tangle('',monsterSize()-16,monsterMad())}</div>
+    ${pair?`<div class="ratepair"><div class="ratebubble" style="background:${feelWord(e.rateBefore)[1]}">${e.rateBefore}</div><span class="arrow">➜</span><div class="ratebubble" style="background:${feelWord(e.rateAfter)[1]}">${e.rateAfter}</div></div>`:''}
+    <div class="big">${esc(spec)}</div>
+    <div class="pointpop">+${d.pts} ⭐</div>
+    <div class="big" style="margin-top:8px;font-size:13px">Tangle got smaller — you and Pip are helping it calm down!</div>
+    ${calm?`<div class="card" style="margin-top:16px;text-align:left;max-width:330px"><h3 style="text-align:center">You\u2019re in a good place 🌟</h3>
+      <button class="choice" onclick="go('sunshine')"><span class="ce">☀️</span>Sunshine</button>
+      <button class="choice" onclick="go('closet')"><span class="ce">🎩</span>Go to my closet</button></div>
+      <button class="btn ghost" style="max-width:260px" onclick="go('home')">Just back home</button>`
+      :`<button class="btn" style="max-width:260px" onclick="go('home')">Back home</button>
+        <button class="btn ghost" style="max-width:260px" onclick="go('wins')">See my wins 🏆</button>`}</div>`;burst();};
+function burst(){const cols=['#ff7ec9','#a64fc9','#ffc23f','#3fd6a8','#5b8ff5','#ff8a3f'];const host=$('cb');if(!host)return;
+  for(let i=0;i<40;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'%';c.style.background=cols[i%cols.length];
+    c.style.animation=`fall ${1.6+Math.random()*1.6}s ${Math.random()*.5}s linear forwards`;if(i%3===0)c.style.borderRadius='50%';host.appendChild(c);}}
+
+/* ---- WINS ---- */
+renderers.wins=()=>{const pct=Math.round(state.monsterShrink/6*100);
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY WINS 🏆</span><div class="step-title">Look how you\u2019re growing!</div>
+  <div class="shrinkbox" style="text-align:center"><div class="duo">${pip('',82)}${tangle('',monsterSize(),monsterMad())}</div>
+    <div style="font-weight:800;color:var(--grape-deep);margin-top:8px">${state.monsterShrink>=6?'Tangle is calm and tiny now! 🌟':'You + Pip are helping Tangle calm down'}</div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div style="font-size:12px;font-weight:800;color:var(--ink-soft);margin-top:6px">Every win helps the big feeling get smaller</div></div>
+  <div class="card" style="display:flex;align-items:center;gap:14px"><div style="font-size:36px">⭐</div>
+    <div><div style="font-family:'Baloo 2';font-size:28px;color:var(--grape-deep)">${state.points}</div>
+    <div style="font-weight:800;color:var(--ink-soft);font-size:13px">points to spend · ${state.totalPoints} earned all-time</div></div></div>
+  <div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">My moments</div>
+  ${state.log.length?state.log.slice(0,25).map(l=>{const sub=(l.tool?'Used: '+esc(l.tool)+' · ':'')+(l.rateBefore!=null&&l.rateAfter!=null?'Feeling '+l.rateBefore+' → '+l.rateAfter:'logged');
+    const em={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎'}[l.section]||'⭐';
+    return `<div class="logitem"><span class="lemoji">${em}</span><div style="flex:1"><div class="lt">${esc(l.title)}</div><div class="ls">${sub}</div></div><span class="badge">+${l.pts}⭐</span></div>`;}).join('')
+    :`<div class="card"><p>No moments yet. Try a door on the home screen — every try is a win! 💜</p></div>`}
+  <button class="btn" onclick="go('home')">Back home</button></div>`;};
+
+/* ---- CLOSET ---- */
+const ITEMS=[{id:'hat',e:'🎩',n:'Top Hat',c:5},{id:'crown',e:'👑',n:'Crown',c:10},{id:'bow',e:'🎀',n:'Big Bow',c:8},{id:'shades',e:'🕶️',n:'Cool Shades',c:6},{id:'star',e:'⭐',n:'Star Pal',c:7},{id:'rainbow',e:'🌈',n:'Rainbow',c:12}];
+renderers.closet=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PIP\u2019S CLOSET 🎩</span>
+  <div class="step-title">Dress up Pip</div><div class="step-sub">Buy an item, then tap it to put it on. Tap again to take it off!</div>
+  <div class="shrinkbox" style="text-align:center">${pip('',124)}</div>
+  ${ITEMS.map(it=>{const owned=!!state.owned[it.id],worn=state.wearing===it.id,can=state.points>=it.c;
+    const btn=worn?`<button class="tag on" onclick="closetTap('${it.id}')">Wearing ✓</button>`:owned?`<button class="tag use" onclick="closetTap('${it.id}')">Wear</button>`:`<button class="tag buy" onclick="closetTap('${it.id}')">⭐ ${it.c}</button>`;
+    return `<div class="shopitem"><div style="font-size:30px;width:46px;text-align:center">${it.e}</div><b>${esc(it.n)}</b>${btn}</div>`;}).join('')}
+  <div class="skipnote">Earn points by using the doors on the home screen.</div>
+  <button class="btn" onclick="go('home')">Back home</button></div>`;};
+function closetTap(id){const it=ITEMS.find(x=>x.id===id);if(state.owned[id]){state.wearing=state.wearing===id?null:id;save();go('closet');}
+  else if(state.points>=it.c){state.points-=it.c;state.owned[id]=true;state.wearing=id;save();go('closet');}else flashNeed(it.c);}
+
+/* ---- COLORS ---- */
+const THEMES=[{id:'grape',n:'Grape',c:0,a:'#f3ecfb',b:'#fdf2f0'},{id:'sunset',n:'Sunset',c:10,a:'#fff0e6',b:'#ffe3ec'},{id:'ocean',n:'Ocean',c:12,a:'#e3f7ff',b:'#e6fff5'},{id:'bubblegum',n:'Bubblegum',c:12,a:'#ffe9f8',b:'#efe6ff'},{id:'forest',n:'Forest',c:14,a:'#ecf7e6',b:'#f6f7df'},{id:'night',n:'Night Sky',c:18,a:'#2b2c4a',b:'#3a3d6b'}];
+renderers.colors=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">COLORS 🎨</span>
+  <div class="step-title">Change your app colors</div><div class="step-sub">Buy a color set, then tap to use it.</div>
+  ${THEMES.map(t=>{const owned=state.unlockedThemes.includes(t.id),on=state.theme===t.id;
+    const btn=on?`<button class="tag on">Using ✓</button>`:owned?`<button class="tag use" onclick="useTheme('${t.id}')">Use</button>`:`<button class="tag buy" onclick="buyTheme('${t.id}')">⭐ ${t.c}</button>`;
+    return `<div class="shopitem"><div class="swatch" style="background:linear-gradient(160deg,${t.a},${t.b})"></div><b>${esc(t.n)}</b>${btn}</div>`;}).join('')}
+  <button class="btn" onclick="go('home')">Back home</button></div>`;};
+function useTheme(id){state.theme=id;save();setTheme();go('colors');}
+function buyTheme(id){const t=THEMES.find(x=>x.id===id);if(state.points<t.c){flashNeed(t.c);return;}state.points-=t.c;state.unlockedThemes.push(id);state.theme=id;save();setTheme();go('colors');}
+function flashNeed(c){const b=document.createElement('div');b.textContent=`You need ${c} ⭐. Use a door to earn more!`;
+  b.style.cssText='position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--grape);color:#fff;padding:11px 16px;border-radius:999px;font-weight:800;z-index:9;box-shadow:0 6px 16px var(--shadow)';
+  document.body.appendChild(b);setTimeout(()=>b.remove(),1800);}
+
+/* ---- GROWN-UP GATE + ZONE ---- */
+renderers.gate=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GROWN-UPS ONLY 🔒</span>
+  <div class="step-title">Grown-up zone</div><div class="step-sub">Enter the 4-digit PIN. (Default is 1234 until you change it.)</div>
+  <div class="card" style="text-align:center"><input id="pin" inputmode="numeric" maxlength="4" placeholder="••••" style="font-family:'Baloo 2';font-size:34px;text-align:center;letter-spacing:14px;width:190px;color:var(--grape)"></div>
+  <button class="btn" onclick="checkPin()">Unlock</button><div id="pm" class="skipnote"></div></div>`;
+  $('pin').focus();$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});};
+function checkPin(){if($('pin').value===(state.pin||'1234'))go('parentHome');else $('pm').textContent='That PIN is not right.';}
+renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it coming',helpNow:'I need help now',brave:'Be brave',people:'People detective',thought:'Thought detective'};
+  const counts={};Object.keys(sec).forEach(k=>counts[k]=0);state.log.forEach(e=>{if(counts[e.section]!=null)counts[e.section]++;});const maxc=Math.max(1,...Object.values(counts));
+  const ba=state.log.filter(e=>typeof e.rateBefore==='number'&&typeof e.rateAfter==='number');const drop=ba.length?(ba.reduce((s,e)=>s+(e.rateBefore-e.rateAfter),0)/ba.length):null;
+  const sk={};state.log.forEach(e=>{if(e.tool){const n=e.tool;sk[n]=(sk[n]||0)+1;}});const top=Object.entries(sk).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const fmt=t=>{const d=new Date(t);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GROWN-UP ZONE 🔒</span><div class="step-title">${esc(state.name)||'Your child'}\u2019s week</div>
+  <div class="card"><p class="skipnote" style="text-align:left;margin:0">All data stays on this device. Nothing is sent anywhere, and your child can\u2019t open this without the PIN.</p></div>
+  <div class="statrow"><div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">MOMENTS</div></div>
+    <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
+    <div class="statcard"><div class="statnum">${currentStreak()}</div><div class="statlbl">DAY STREAK</div></div></div>
+  <div class="card"><h3>How it\u2019s being used</h3>
+    ${Object.keys(sec).map(k=>`<div class="barrow"><span style="width:120px;font-size:12.5px">${sec[k]}</span><span class="mini"><i style="width:${counts[k]/maxc*100}%"></i></span><span>${counts[k]}</span></div>`).join('')}</div>
+  <div class="card"><h3>Is it helping?</h3>
+    <p>${drop==null?'<span style="color:var(--ink-soft)">No before/after ratings yet.</span>':'Average feeling change: <b>'+drop.toFixed(1)+' points lower</b> after using a tool ('+ba.length+' rated moments).'}</p>
+    ${top.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:14px">Most-used tools</div>${top.map(([n,c])=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(n)}</span><b>${c}</b></div>`).join('')}`:''}</div>
+  <div class="card"><h3>Recent moments</h3>${state.log.length?state.log.slice(0,15).map(e=>{const r=(e.rateBefore!=null&&e.rateAfter!=null)?` · ${e.rateBefore}→${e.rateAfter}`:'';const g=e.gotGrownUp?' · asked for a grown-up':'';
+    return `<div style="font-size:13px;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,.12)"><b>${esc(sec[e.section]||e.section)}</b> <span style="color:var(--ink-soft)">${fmt(e.ts)}</span>${r}${g}</div>`;}).join(''):'<p>Nothing logged yet.</p>'}</div>
+  <div class="card"><h3>Settings</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><b>Faith moments</b><br><span class="skipnote" style="text-align:left">A gentle line in Sunshine + prayer tool. Now ${state.faith?'on':'off'}.</span></div>
+      <button class="tag ${state.faith?'use':'buy'}" onclick="state.faith=!state.faith;save();go('parentHome')">${state.faith?'Turn off':'Turn on'}</button></div>
+    <div style="height:12px"></div>
+    <button class="btn ghost" onclick="renameChild()">Edit child\u2019s name (${esc(state.name)||'not set'})</button>
+    <button class="btn ghost" onclick="changePin()">Change PIN</button>
+    <button class="btn ghost" style="color:#d8334a" onclick="wipe()">Reset all data on this device</button></div>
+  <button class="btn" onclick="go('home')">Back to ${esc(state.name)||'kid'}\u2019s app</button></div>`;};
+function renameChild(){const v=prompt("Child\u2019s name:",state.name||'');if(v!=null){state.name=v.trim().slice(0,18);save();go('parentHome');}}
+function changePin(){const v=prompt('Set a new 4-digit PIN:',state.pin||'1234');if(v!=null){const c=v.replace(/\D/g,'').slice(0,4);if(c.length===4){state.pin=c;save();alert('PIN updated.');}else alert('PIN must be 4 digits.');}}
+function wipe(){if(confirm('Erase all points, rewards, and history on this device? This cannot be undone.')){state=freshState();save();setTheme();go('onboard');}}
+
+/* ---- DISTRACT ME (facts, jokes, bubble pop, math bubble) ---- */
+let gAudio=null;
+function popSound(){try{gAudio=gAudio||new (window.AudioContext||window.webkitAudioContext)();const o=gAudio.createOscillator(),g=gAudio.createGain();o.type='sine';o.frequency.value=480+Math.random()*120;g.gain.setValueAtTime(0.0001,gAudio.currentTime);g.gain.exponentialRampToValueAtTime(0.14,gAudio.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,gAudio.currentTime+0.13);o.connect(g);g.connect(gAudio.destination);o.start();o.stop(gAudio.currentTime+0.14);}catch(e){}}
+function popBubble(b){b.style.animationPlayState='paused';b.style.transition='opacity .2s ease';b.style.opacity='0';setTimeout(()=>{if(b.parentNode)b.remove();},200);}
+
+renderers.distract=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">DISTRACT ME 🎲</span>
+  <div class="step-title">Take your mind off it</div><div class="step-sub">Pick something fun for a minute.</div>
+  <button class="choice" onclick="go('jokeT')"><span class="ce">😂</span>Tell me a joke</button>
+  <button class="choice" onclick="go('factT')"><span class="ce">🤓</span>Tell me a fact</button>
+  <button class="choice" onclick="go('bubblePop')"><span class="ce">🫧</span>Pop the bubbles</button>
+  <button class="choice" onclick="go('mathPick')"><span class="ce">🔢</span>Math bubble pop</button>
+  <button class="btn go" onclick="afterTool()">Done — I feel better ✅</button></div>`;};
+
+renderers.factT=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">DID YOU KNOW? 🤓</span>
+  <div class="card" style="margin-top:14px"><p style="font-size:18px;font-weight:700;line-height:1.45">${esc(pickRandom(FACTS))}</p></div>
+  <button class="btn" onclick="renderers.factT()">Another! →</button>
+  <button class="btn ghost" onclick="goBack()">← Back to distractions</button></div>`;};
+
+let curJoke=null;
+renderers.jokeT=()=>{curJoke=pickRandom(JOKES);renderJoke(false);};
+function renderJoke(reveal){screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">HA HA! 😂</span>
+  <div class="card" style="margin-top:14px"><p style="font-size:18px;font-weight:700">${esc(curJoke.q)}</p>
+   ${reveal?`<p style="font-size:18px;font-weight:800;color:var(--grape);margin-top:12px">${esc(curJoke.a)}</p>`:''}</div>
+  ${reveal?`<button class="btn" onclick="renderers.jokeT()">Another one 🥁</button>`:`<button class="btn" onclick="renderJoke(true)">Tell me! 🥁</button>`}
+  <button class="btn ghost" onclick="goBack()">← Back to distractions</button></div>`;}
+
+/* bubble pop game */
+let bpInt,bpSpawn,bpCount,bpEnd;
+renderers.bubblePop=()=>{bpCount=0;bpEnd=Date.now()+60000;
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">POP THE BUBBLES 🫧</span>
+   <div class="gamehud"><div><span id="bpc">0</span> popped! 🫧</div><div>⏱ <span id="bpt">1:00</span></div></div>
+   <div id="bfield" class="gamefield" style="background:linear-gradient(180deg,#C6E5F5,#E8F6FF)"></div>
+   <button class="btn ghost" onclick="endBubblePop()">Stop early</button></div>`;
+  bpSpawn=setInterval(spawnBubble,350);
+  bpInt=setInterval(()=>{const r=Math.max(0,Math.ceil((bpEnd-Date.now())/1000));const el=$('bpt');if(el){const m=Math.floor(r/60),s=r%60;el.textContent=m+':'+(s<10?'0':'')+s;}if(r<=0)endBubblePop();},250);};
+function spawnBubble(){const f=$('bfield');if(!f)return;const rect=f.getBoundingClientRect();const size=30+Math.floor(Math.random()*50);const left=Math.random()*Math.max(10,rect.width-size);const dur=4+Math.random()*3;
+  const cols=['rgba(167,200,232,.85)','rgba(255,180,192,.85)','rgba(255,201,74,.85)','rgba(125,211,181,.85)','rgba(232,214,255,.85)'];const color=cols[Math.floor(Math.random()*cols.length)];
+  const b=document.createElement('div');b.style.cssText=`position:absolute;left:${left}px;bottom:-${size}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),${color});border:2px solid rgba(26,26,26,.55);box-shadow:inset -4px -4px 8px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.15);animation:bubbleRise ${dur}s linear forwards;cursor:pointer;touch-action:manipulation`;
+  const pop=(ev)=>{ev.stopPropagation();if(!b.parentNode)return;bpCount++;const c=$('bpc');if(c)c.textContent=bpCount;popSound();popBubble(b);};
+  b.addEventListener('click',pop);b.addEventListener('touchstart',pop,{passive:true});f.appendChild(b);
+  setTimeout(()=>{if(b.parentNode)b.remove();},dur*1000+120);}
+function endBubblePop(){stopGames();
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">NICE POPPING! 🫧</span>
+   <div style="font-size:54px;font-family:'Baloo 2';font-weight:800;color:var(--grape-deep);margin:18px">${bpCount}</div><p style="font-weight:700">bubbles popped!</p>
+   <button class="btn" onclick="go('bubblePop')">Play again 🫧</button>
+   <button class="btn ghost" onclick="go('distract')">← Back to distractions</button></div>`;}
+
+/* math bubble pop */
+let mInt,mSpawn,mScore,mStreak,mEnd,mAns,mOp='mix';
+function mOpName(){return {'+':'Adding','−':'Subtracting','×':'Times','÷':'Dividing','mix':'Mix it up'}[mOp]||'Mix it up';}
+renderers.mathPick=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MATH BUBBLE POP 🔢</span>
+   <div class="step-title">What do you want to practice?</div><div class="step-sub">Pop the bubble with the right answer!</div>
+   <button class="choice" onclick="mOp='+';go('mathPop')"><span class="ce">➕</span>Adding</button>
+   <button class="choice" onclick="mOp='−';go('mathPop')"><span class="ce">➖</span>Subtracting</button>
+   <button class="choice" onclick="mOp='×';go('mathPop')"><span class="ce">✖️</span>Times (multiply)</button>
+   <button class="choice" onclick="mOp='÷';go('mathPop')"><span class="ce">➗</span>Dividing</button>
+   <button class="choice" onclick="mOp='mix';go('mathPop')"><span class="ce">🎲</span>Mix them all up</button></div>`;};
+renderers.mathPop=()=>{mScore=0;mStreak=0;mEnd=Date.now()+60000;
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MATH POP · ${mOpName().toUpperCase()} 🔢</span>
+   <div class="gamehud"><div>⭐ <span id="msc">0</span></div><div>🔥 <span id="mst">0</span></div><div>⏱ <span id="mtl">1:00</span></div></div>
+   <div id="mprob" class="mathprob">—</div>
+   <div id="mfield" class="gamefield" style="height:46vh;max-height:400px;background:linear-gradient(180deg,#E8D6FF,#F4E8FF)"></div>
+   <button class="btn ghost" onclick="endMathPop()">Stop early</button></div>`;
+  genMath();mSpawn=setInterval(spawnMathBubble,750);
+  mInt=setInterval(()=>{const r=Math.max(0,Math.ceil((mEnd-Date.now())/1000));const el=$('mtl');if(el){const m=Math.floor(r/60),s=r%60;el.textContent=m+':'+(s<10?'0':'')+s;}if(r<=0)endMathPop();},250);};
+function genMath(){const ops=['+','−','×','÷'];const op=(mOp==='mix')?ops[Math.floor(Math.random()*ops.length)]:mOp;let a,b,ans;
+  if(op==='+'){a=2+Math.floor(Math.random()*18);b=2+Math.floor(Math.random()*18);ans=a+b;}
+  else if(op==='−'){a=5+Math.floor(Math.random()*25);b=1+Math.floor(Math.random()*(a-1));ans=a-b;}
+  else if(op==='×'){a=2+Math.floor(Math.random()*11);b=2+Math.floor(Math.random()*11);ans=a*b;}
+  else{ans=2+Math.floor(Math.random()*11);b=2+Math.floor(Math.random()*11);a=ans*b;}
+  mAns=ans;const el=$('mprob');if(el)el.textContent=`${a} ${op} ${b} = ?`;}
+function spawnMathBubble(){const f=$('mfield');if(!f)return;const rect=f.getBoundingClientRect();const size=64;const left=Math.random()*Math.max(10,rect.width-size);const dur=6+Math.random()*2;
+  let value;if(Math.random()<0.4){value=mAns;}else{let d;do{d=(Math.random()<0.5?-1:1)*(1+Math.floor(Math.random()*10));}while(d===0);value=Math.max(0,mAns+d);if(value===mAns)value+=1;}
+  const cols=['#A7C8E8','#FFB4C0','#FFC94A','#7DD3B5','#E8D6FF'];const color=cols[Math.floor(Math.random()*cols.length)];
+  const b=document.createElement('div');b.dataset.v=value;b.style.cssText=`position:absolute;left:${left}px;bottom:-${size}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),${color});border:2.5px solid rgba(26,26,26,.6);box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2';font-weight:800;font-size:22px;color:#1a1a1a;animation:bubbleRise ${dur}s linear forwards;cursor:pointer;touch-action:manipulation;user-select:none`;b.textContent=value;
+  const tap=(ev)=>{ev.stopPropagation();if(!b.parentNode)return;
+    if(parseInt(b.dataset.v,10)===mAns){mScore++;mStreak++;const sc=$('msc'),st=$('mst');if(sc)sc.textContent=mScore;if(st)st.textContent=mStreak;popSound();popBubble(b);const p=$('mprob');if(p){p.style.background='#7DD3B5';setTimeout(()=>{if(p)p.style.background='';},220);}genMath();}
+    else{mStreak=0;const st=$('mst');if(st)st.textContent=mStreak;b.style.borderColor='#e23a5e';setTimeout(()=>{if(b.parentNode)b.style.borderColor='rgba(26,26,26,.6)';},300);}};
+  b.addEventListener('click',tap);b.addEventListener('touchstart',tap,{passive:true});f.appendChild(b);
+  setTimeout(()=>{if(b.parentNode)b.remove();},dur*1000+120);}
+function endMathPop(){stopGames();
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">BRAIN WORKOUT! 🧠</span>
+   <div class="duo" style="margin:8px 0;gap:24px"><div><div style="font-family:'Baloo 2';font-size:40px;color:var(--grape-deep)">${mScore}</div><div style="font-weight:800;font-size:12px">got right ⭐</div></div>
+     <div><div style="font-family:'Baloo 2';font-size:40px;color:var(--tangerine)">${mStreak}</div><div style="font-weight:800;font-size:12px">final streak 🔥</div></div></div>
+   <button class="btn" onclick="go('mathPop')">Play again 🔢</button>
+   <button class="btn ghost" onclick="go('mathPick')">Pick a different kind →</button>
+   <button class="btn ghost" onclick="go('distract')">← Back to distractions</button></div>`;}
+
+function stopGames(){if(bpInt){clearInterval(bpInt);bpInt=null;}if(bpSpawn){clearInterval(bpSpawn);bpSpawn=null;}if(mInt){clearInterval(mInt);mInt=null;}if(mSpawn){clearInterval(mSpawn);mSpawn=null;}}
+
+/* ---- boot ---- */
+(async function(){Store.init();const saved=await Store.load();state=migrate(saved);setTheme();
+  stack=[{view:state.onboarded?'home':'onboard'}];currentView=stack[0].view;(renderers[currentView]||renderers.home)();})();
+</script>
