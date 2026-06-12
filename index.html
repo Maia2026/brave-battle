@@ -1,7 +1,14 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pip &amp; Tangle</title>
+<title>Brave Battle</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#a64fc9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Brave Battle">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -169,7 +176,7 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
 
 <script>
 /* =========================================================
-   Pip & Tangle — tester clubhouse (anger + worry)
+   Brave Battle — tester clubhouse (anger + worry) · characters: Pip & Tangle
    Same spirit as Bubble. Self-contained, saves to this device.
    ========================================================= */
 const $ = id => document.getElementById(id);
@@ -359,7 +366,7 @@ function greeting(streak,u){const p=["Hi, I\u2019m <b>Pip</b>. I\u2019m so glad 
 /* ---- home ---- */
 renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cachedGreeting)cachedGreeting=greeting(streak,u);
   screen.innerHTML=`<div class="toprow"><div class="streakpill" title="day streak">🔥 ${streak}</div><div class="spacer"></div><div class="pointchip">⭐ ${state.points}</div></div>
-  <div class="pad fade"><div style="text-align:center"><div class="hero-name">Pip &amp; Tangle</div><div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
+  <div class="pad fade"><div style="text-align:center"><div class="hero-name">Brave Battle</div><div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
     <div class="duo" style="margin-top:4px">${pip('',120)}</div>
     <div class="speech">${cachedGreeting}</div>
     <div class="statrow">
