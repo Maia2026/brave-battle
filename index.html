@@ -33,7 +33,7 @@ body{
   background:linear-gradient(170deg,var(--bg1),var(--bg2)); background-attachment:fixed;
   -webkit-font-smoothing:antialiased; min-height:100dvh; transition:background .5s;
 }
-#screen{max-width:470px;margin:0 auto;min-height:100dvh}
+#screen{max-width:470px;margin:0 auto;min-height:100dvh;padding-bottom:46px}
 h1,h2,h3,.disp{font-family:'Baloo 2',cursive;margin:0}
 .pad{padding:0 18px 40px}
 .fade{animation:fade .3s ease}
@@ -169,10 +169,44 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
 .tag{margin-left:auto;border:none;border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:13.5px}
 .tag.buy{background:var(--gold);color:#5a4410}.tag.use{background:var(--mint);color:#0f4536}.tag.on{background:transparent;color:var(--ink-soft)}
 
+/* persistent footer + crisis help (on every screen, never gated) */
+#appfoot{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:7px 12px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-top:1px solid rgba(0,0,0,.08)}
+[data-theme="night"] #appfoot{background:rgba(28,28,46,.92);border-top-color:rgba(255,255,255,.12)}
+#appfoot .fc{font-size:10.5px;color:#9aa0ab;text-align:center;line-height:1.2}
+#appfoot .fh{flex:none;border:none;background:var(--coral,#ff5b6e);color:#fff;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
+#appfoot .fh:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+.legal h3{color:var(--grape-deep);font-size:16px;margin:0 0 6px}
+.legal p{font-size:13.5px;line-height:1.5;margin:0}
+.legal .small{font-size:12px;color:var(--ink-soft)}
+.crisis-line{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;padding:14px;margin-top:10px;box-shadow:0 4px 12px var(--shadow);font-weight:700;font-size:15px}
+.crisis-line .ci{font-size:24px;flex:none}
+.crisis-line a{color:var(--grape);font-weight:800;text-decoration:none}
+#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(170deg,#b794f6,#e6d6ff);transition:opacity .45s ease;text-align:center;padding:24px}
+#splash .sn{font-family:'Baloo 2';font-size:36px;color:#fff;margin-top:10px;text-shadow:0 2px 8px rgba(111,47,147,.3)}
+#splash .ss{color:#fff;font-weight:700;opacity:.95;margin-top:2px}
+#splash .sc{color:#fff;font-weight:700;opacity:.8;font-size:12px;margin-top:18px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 
+<div id="splash">
+  <svg width="118" height="118" viewBox="0 0 200 200" aria-hidden="true"><g>
+    <circle cx="100" cy="100" r="58" fill="#6e8ff5"/>
+    <ellipse cx="84" cy="94" rx="8" ry="12" fill="#23305c"/><ellipse cx="116" cy="94" rx="8" ry="12" fill="#23305c"/>
+    <circle cx="87" cy="89" r="3" fill="#fff"/><circle cx="119" cy="89" r="3" fill="#fff"/>
+    <path d="M86 116 Q100 130 114 116" stroke="#23305c" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="74" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/><circle cx="126" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/>
+  </g></svg>
+  <div class="sn">Brave Battle</div>
+  <div class="ss">A Brave Kids United project</div>
+  <div class="sc">© 2026 Brave Kids United Inc</div>
+</div>
 <div id="screen"></div>
+<footer id="appfoot">
+  <span class="fc">© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.</span>
+  <button class="fh" onclick="openCrisis()" aria-label="Crisis resources">🆘 Help</button>
+</footer>
 
 <script>
 /* =========================================================
@@ -207,11 +241,14 @@ const Store={
 let state=null, flow={}, cachedGreeting=null;
 const MONSTER_SIZES=[140,126,112,100,88,76,64];
 function freshState(){return{
-  name:'', onboarded:false, points:0, totalPoints:0, monsterShrink:0,
+  name:'', onboarded:false, acknowledged:false, ackVersion:0, points:0, totalPoints:0, monsterShrink:0,
   theme:'grape', wearing:null, owned:{}, unlockedThemes:['grape'],
   faith:true, pin:'1234', log:[], gratitudes:[], customMantras:[],
   usedDays:{}, streakCount:0, lastUseDay:''
 };}
+const FOOT_TEXT='© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.';
+const ACK_VERSION=2; // bump to re-show the welcome/disclosures to everyone after legal changes
+function ackOK(){return state.acknowledged && state.ackVersion===ACK_VERSION;}
 function migrate(s){if(!s)return freshState();const b=freshState();for(const k in b)if(s[k]==null)s[k]=b[k];return s;}
 function save(){Store.save(state);}
 
@@ -332,6 +369,61 @@ function topbar(){return `<div class="toprow">${currentView!=='home'?'<button cl
 
 const renderers={};
 
+/* ---- one-time welcome / first-launch gate (once per device) ---- */
+renderers.disclaimer=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:5vh">
+  <div style="text-align:center"><div class="duo">${pip('',96)}</div>
+  <div class="step-title" style="font-size:27px;margin-top:8px">Welcome to Brave Battle</div></div>
+  <div class="card" style="margin-top:14px">
+    <p style="font-weight:700;line-height:1.5">Brave Battle is a tester app from <b>Brave Kids United</b>, a nonprofit helping kids build confidence and coping skills.</p>
+    <p style="font-weight:800;margin-top:12px">Before you start, please know:</p>
+    <p style="line-height:1.6;margin-top:4px">• This app is a support tool — it is not a substitute for therapy or medical care.<br>
+    • If your child is in crisis, please call or text <a href="tel:988" style="color:var(--grape);font-weight:800">988</a> (Suicide &amp; Crisis Lifeline).<br>
+    • This is a tester version. We will check in with you for feedback.</p>
+  </div>
+  <button class="btn" onclick="acknowledge()">I understand ›</button>
+  <button class="btn ghost" onclick="openCrisis()">Crisis Resources</button>
+  <div class="skipnote">This shows once on this device.</div></div>`;};
+function acknowledge(){state.acknowledged=true;state.ackVersion=ACK_VERSION;save();go(state.onboarded?'home':'onboard');}
+
+/* ---- crisis resources (reachable from anywhere, never gated) ---- */
+function openCrisis(){go('crisis');}
+renderers.crisis=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag" style="background:#ffd9dc;color:#b4283a">CRISIS RESOURCES 🆘</span>
+  <div class="step-title">If you need help right now</div>
+  <div class="step-sub">For you or your child — any time, day or night.</div>
+  <div class="crisis-line"><span class="ci">📞</span><div><a href="tel:988">988</a> — Call or text the Suicide &amp; Crisis Lifeline (24/7)</div></div>
+  <div class="crisis-line"><span class="ci">💬</span><div>Text HOME to <a href="sms:741741">741741</a> — Crisis Text Line (24/7)</div></div>
+  <div class="crisis-line"><span class="ci">🚨</span><div><a href="tel:911">911</a> — For emergencies</div></div>
+  <div class="card tip" style="margin-top:14px"><p>You are not alone. Please reach out. 💜</p></div>
+  <button class="btn" onclick="goBack()">Back</button></div>`;};
+
+/* ---- About / Parent Info (reachable from home; ungated) ---- */
+renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><span class="step-tag">ABOUT &amp; PARENT INFO 💜</span>
+  <div class="step-title">About Brave Battle</div>
+  <div class="card"><h3>About Brave Battle</h3>
+    <p>Brave Battle is a tester app provided by Brave Kids United Inc, an Indiana nonprofit corporation. It is designed to help children practice coping skills and build confidence when working through everyday emotional challenges such as anxiety and worry.</p>
+    <p style="margin-top:8px">This is an early tester version. The real app, when fully launched, will include personalized features, character design, faith-level options, parent and therapist tools, and much more.</p></div>
+  <div class="card"><h3>Important — Not a Substitute for Care</h3>
+    <p>Brave Battle is a support tool, not a replacement for professional care. It does not diagnose, treat, or cure any medical or psychological condition.</p>
+    <p style="margin-top:8px">This app is not designed for use in crisis situations or for conditions that require professional treatment, including (but not limited to) trauma, eating disorders, severe depression, suicidal thoughts, self-harm, psychosis, or substance abuse. For any of these, please contact a licensed professional immediately.</p>
+    <p style="margin-top:8px">Brave Kids United Inc and the Brave Battle team are not licensed mental health professionals. Content within Brave Battle does not constitute medical, psychological, or therapeutic advice.</p>
+    <p style="margin-top:8px"><b>If your child is in crisis:</b><br>• Call or text <a href="tel:988" style="color:var(--grape);font-weight:800">988</a> (Suicide &amp; Crisis Lifeline)<br>• Text HOME to <a href="sms:741741" style="color:var(--grape);font-weight:800">741741</a> (Crisis Text Line)<br>• Call <a href="tel:911" style="color:var(--grape);font-weight:800">911</a> for emergencies</p></div>
+  <div class="card"><h3>Your Data</h3>
+    <p>This is a <b>demo (tester) version</b> of Brave Battle, and it is built to keep your child's information on the device.</p>
+    <p style="margin-top:8px">• <b>No server, by design — for this demo.</b> This tester version does not send anything anywhere. There is no account, no login, and no Brave Kids United Inc server collecting information — so nothing your child does in this demo travels back to us. We never receive it, and we can't see it.<br>
+    • <b>Saved on this device only.</b> To make the app work, it stores a few things right on the device: a nickname your child picks, their points and rewards, and anything they type in the app (like a gratitude note or a worry they check). This stays on the device and is visible only in the Grown-Ups area on that same device.<br>
+    • <b>No personal info requested.</b> No emails, no ages, no contact information.<br>
+    • <b>You're in control.</b> To erase everything, tap "Reset all data" in the Grown-Ups section, or clear this app's data from the device.</p>
+    <p style="margin-top:8px">Because this demo collects nothing on our end, there is no data about your family for us to store, share, or delete.</p>
+    <p style="margin-top:8px"><b>Looking ahead:</b> the full version of Brave Battle (still in development) is planned to include online features such as saved accounts, personalization, and parent and therapist tools, which will use a server. That future version will come with its own, updated privacy information before it is used — this notice covers the demo only.</p>
+    <p style="margin-top:8px">Your feedback comes through talking with us directly, not through the app.</p></div>
+  <div class="card"><h3>Contact / Feedback</h3>
+    <p>We'd love to hear from you. Reach Christina at <a href="mailto:cdevine628@gmail.com" style="color:var(--grape);font-weight:800">cdevine628@gmail.com</a> with any feedback, questions, or concerns.</p></div>
+  <div class="card"><h3>Legal</h3>
+    <p class="small">© 2026 Brave Kids United Inc — All rights reserved.<br>
+    Brave Battle™ is a trademark of Brave Kids United Inc.<br>
+    Brave Kids United Inc is a nonprofit corporation registered in the State of Indiana.</p></div>
+  <button class="btn" onclick="goBack()">Back</button></div>`;};
+
 /* ---- onboarding (two steps: meet Pip + name, then meet Tangle) ---- */
 renderers.onboard=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:6vh;text-align:center">
   <span class="step-tag">WELCOME 👋</span>
@@ -383,7 +475,8 @@ renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cache
       <button class="minicard" onclick="go('wins')"><div class="mi">🏆</div><div class="ml">My Wins</div></button>
       <button class="minicard ${state.wearing?'wearing':''}" onclick="go('closet')"><div class="mi">🎩</div><div class="ml">Closet</div></button>
       <button class="minicard" onclick="go('colors')"><div class="mi">🎨</div><div class="ml">Colors</div></button>
-      <button class="minicard" onclick="go('gate')"><div class="mi">🔒</div><div class="ml">Grown-Ups</div></button></div></div>`;};
+      <button class="minicard" onclick="go('gate')"><div class="mi">🔒</div><div class="ml">Grown-Ups</div></button></div>
+    <button class="btn ghost" style="margin-top:10px" onclick="go('about')">About / Parent Info</button></div>`;};
 
 /* ---- rate ---- */
 renderers.rate=(d)=>{const after=d.when==='after';const start=after?Math.max(0,(flow.rateBefore!=null?flow.rateBefore:5)-2):5;
@@ -694,11 +787,12 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
     <div style="height:12px"></div>
     <button class="btn ghost" onclick="renameChild()">Edit child\u2019s name (${esc(state.name)||'not set'})</button>
     <button class="btn ghost" onclick="changePin()">Change PIN</button>
+    <button class="btn ghost" onclick="go('about')">About / Parent Info</button>
     <button class="btn ghost" style="color:#d8334a" onclick="wipe()">Reset all data on this device</button></div>
   <button class="btn" onclick="go('home')">Back to ${esc(state.name)||'kid'}\u2019s app</button></div>`;};
 function renameChild(){const v=prompt("Child\u2019s name:",state.name||'');if(v!=null){state.name=v.trim().slice(0,18);save();go('parentHome');}}
 function changePin(){const v=prompt('Set a new 4-digit PIN:',state.pin||'1234');if(v!=null){const c=v.replace(/\D/g,'').slice(0,4);if(c.length===4){state.pin=c;save();alert('PIN updated.');}else alert('PIN must be 4 digits.');}}
-function wipe(){if(confirm('Erase all points, rewards, and history on this device? This cannot be undone.')){state=freshState();save();setTheme();go('onboard');}}
+function wipe(){if(confirm('Erase all points, rewards, and history on this device? This cannot be undone.')){state=freshState();save();setTheme();go('disclaimer');}}
 
 /* ---- DISTRACT ME (facts, jokes, bubble pop, math bubble) ---- */
 let gAudio=null;
@@ -792,5 +886,7 @@ function stopGames(){if(bpInt){clearInterval(bpInt);bpInt=null;}if(bpSpawn){clea
 
 /* ---- boot ---- */
 (async function(){Store.init();const saved=await Store.load();state=migrate(saved);setTheme();
-  stack=[{view:state.onboarded?'home':'onboard'}];currentView=stack[0].view;(renderers[currentView]||renderers.home)();})();
+  stack=[{view: !ackOK() ? 'disclaimer' : (state.onboarded?'home':'onboard')}];currentView=stack[0].view;(renderers[currentView]||renderers.home)();
+  setTimeout(()=>{const sp=$('splash');if(sp){sp.style.opacity='0';setTimeout(()=>{if(sp&&sp.parentNode)sp.remove();},500);}},1300);
+})();
 </script>
