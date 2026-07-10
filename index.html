@@ -199,7 +199,8 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
     <circle cx="74" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/><circle cx="126" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/>
   </g></svg>
   <div class="sn">Brave Battle</div>
-  <div class="ss">A Brave Kids United project</div>
+  <div class="ss">Battle Big Feelings, Together</div>
+  <div class="ss" style="font-size:13px;opacity:.85">A Brave Kids United project</div>
   <div class="sc">© 2026 Brave Kids United Inc</div>
 </div>
 <div id="screen"></div>
@@ -210,7 +211,7 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
 
 <script>
 /* =========================================================
-   Brave Battle — tester clubhouse (anger + worry) · characters: Pip & Tangle
+   Brave Battle — tester clubhouse (anger + worry) · characters: Bloom & Tangle
    Same spirit as Bubble. Self-contained, saves to this device.
    ========================================================= */
 const $ = id => document.getElementById(id);
@@ -243,17 +244,19 @@ const MONSTER_SIZES=[140,126,112,100,88,76,64];
 function freshState(){return{
   name:'', onboarded:false, acknowledged:false, ackVersion:0, points:0, totalPoints:0, monsterShrink:0,
   theme:'grape', wearing:null, owned:{}, unlockedThemes:['grape'],
-  faith:true, pin:'1234', log:[], gratitudes:[], customMantras:[],
+  faith:true, faithLevel:'light', pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[],
   usedDays:{}, streakCount:0, lastUseDay:''
 };}
 const FOOT_TEXT='© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.';
 const ACK_VERSION=2; // bump to re-show the welcome/disclosures to everyone after legal changes
 function ackOK(){return state.acknowledged && state.ackVersion===ACK_VERSION;}
-function migrate(s){if(!s)return freshState();const b=freshState();for(const k in b)if(s[k]==null)s[k]=b[k];return s;}
+function migrate(s){if(!s)return freshState();const b=freshState();
+  if(s.faithLevel==null)s.faithLevel=(s.faith===false)?'none':'light';
+  for(const k in b)if(s[k]==null)s[k]=b[k];s.faith=(s.faithLevel!=='none');return s;}
 function save(){Store.save(state);}
 
 /* ---- points / streak / usage ---- */
-const PTS={warning:3,during:2,brave:3,people:2,reflect:1};
+const PTS={warning:3,during:2,brave:3,people:2,reflect:2,checkin:1,sunshine:1};
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function dayOffset(n){const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function recordUsageDay(){const t=todayKey();if(!state.usedDays)state.usedDays={};const first=!state.usedDays[t];state.usedDays[t]=true;
@@ -305,54 +308,132 @@ function monsterMad(){return Math.max(0,1-state.monsterShrink*0.16);}
 
 /* ---- content ---- */
 const TOOLS=[
-  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵']},
-  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Squeeze your fists, then let go — 5 times ✊']},
-  {id:'craft',e:'🎨',name:'Craft or read',kind:'list',ideas:['Draw or color something just for fun 🎨','Read a few pages of your book 📖','Build or make a little craft ✂️','Find a cozy spot that is just yours 🛋️']},
-  {id:'calmmind',e:'🌈',name:'Calm my mind',kind:'list',ideas:['Name 5 things you see, 4 you hear, 3 you can touch 👀','Count slowly backwards from 20 🔢','Name every color you can find in the room 🌈','Picture your calm happy place 🏖️']},
+  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵','Do 10 wall push-ups 💪','Hop on one foot, then the other 🦩','Crab-walk across the room 🦀','Squeeze a pillow as hard as you can, then drop it 🛏️']},
+  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Hold something soft and notice how it feels 🧸','Press your palms together, then release 🙌','Rock slowly side to side 🎐','Put a hand on your heart and feel it slow down 💗']},
+  {id:'ground',e:'🖐️',name:'5-4-3-2-1 grounding',kind:'ground'},
+  {id:'squeeze',e:'✊',name:'Squeeze and let go',kind:'squeeze'},
+  {id:'craft',e:'🎨',name:'Craft or read',kind:'list',ideas:['Draw or color something just for fun 🎨','Read a few pages of your book 📖','Build or make a little craft ✂️','Find a cozy spot that is just yours 🛋️','Make up a story about Bloom 📚','Fold paper into something new 📄','Doodle shapes until the page is full ✏️']},
+  {id:'calmmind',e:'🌈',name:'Calm my mind',kind:'list',ideas:['Count slowly backwards from 20 🔢','Name every color you can find in the room 🌈','Picture your calm happy place 🏖️','Name an animal for every letter A-E 🦓','Think of 3 things that made you laugh 😄','Say the alphabet backwards, slowly 🔤','Picture the feeling floating away like a balloon 🎈']},
   {id:'balloon',e:'🎈',name:'Balloon breath',kind:'breath'},
-  {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️']},
+  {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️','Run cool water over your wrists 🚰','Hold an ice cube until it starts to melt 🧊']},
   {id:'mantra',e:'💜',name:'Say positive mantras',kind:'mantra'},
-  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Tell Pip exactly what happened 💬','Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️']},
+  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️','Growl it into a pillow 🦁','Make an angry drawing, then turn it into something silly 🎨']},
+  {id:'tell',e:'💬',name:'Tell Bloom about it',kind:'tell'},
   {id:'faith',e:'🙏',name:'Prayer or verse',kind:'faith'},
   {id:'distract',e:'🎲',name:'Distract me',kind:'distract'},
 ];
-const MANTRAS=['I can, I can, I know I can.','Big feelings always pass.','This feeling is just a feeling — it will pass.','I am safe right now.','I can do hard things.','I am brave even when I am scared.','I am stronger than my thoughts.','I survived this before. I can do it now.','I am getting stronger every day.','Hard things help me grow.','I can be upset AND still be kind.','I get to choose what happens next.','Mistakes help me learn.','I can ask for help — that is brave too.','I am safe. I am loved. I am okay.','Slow breaths bring me back to calm.','There is always something good to find.','I have done brave things before.'];
+const MANTRAS=['I can, I can, I know I can.','Big feelings always pass.','This feeling is just a feeling — it will pass.','I am safe right now.','I can do hard things.','I am brave even when I am scared.','I am stronger than my thoughts.','I survived this before. I can do it now.','I am getting stronger every day.','Hard things help me grow.','I can be upset AND still be kind.','I get to choose what happens next.','Mistakes help me learn.','I can ask for help — that is brave too.','I am safe. I am loved. I am okay.','Slow breaths bring me back to calm.','There is always something good to find.','I have done brave things before.','My feelings are okay. My choices are up to me.','I am not my worst moment.','I can start over any time.','One small step is still a step.','I am allowed to take up space.','Nothing about today changes how loved I am.','Even big waves come back down. 🌊','I do not have to be perfect to be proud.'];
 function pickRandom(a){return a[Math.floor(Math.random()*a.length)];}
-const FACTS=["Otters hold hands while they sleep so they don\u2019t drift apart.","Honey never spoils — archaeologists found 3,000-year-old honey that\u2019s still good!","A group of flamingos is called a \u2018flamboyance\u2019.","Octopuses have THREE hearts and BLUE blood.","Bananas are berries, but strawberries aren\u2019t!","A cloud can weigh more than a million pounds.","Cows have best friends and get sad when they\u2019re apart.","Sea otters keep a favorite rock in a little pocket of skin under their arm.","Wombat poop is cube-shaped!","Butterflies taste with their FEET.","Sharks existed before trees did.","There are more stars in space than grains of sand on every beach on Earth.","A jiffy is a real unit of time — one hundredth of a second.","Sloths can hold their breath longer than dolphins can."];
-const JOKES=[{q:'What do you call a sleeping dinosaur?',a:'A dino-snore! 🦕'},{q:'Why did the bicycle fall over?',a:'It was two-tired. 🚲'},{q:'What do you call cheese that isn\u2019t yours?',a:'Nacho cheese! 🧀'},{q:'Why did the math book look sad?',a:'It had too many problems. 📓'},{q:'What\u2019s orange and sounds like a parrot?',a:'A carrot. 🥕'},{q:'Why can\u2019t you give Elsa a balloon?',a:'Because she\u2019ll let it go. 🎈'},{q:'What do you call a bear with no teeth?',a:'A gummy bear! 🐻'},{q:'Why did the cookie go to the doctor?',a:'It was feeling crumb-y. 🍪'},{q:'What do you call a fish wearing a bowtie?',a:'So-fish-ticated. 🐟'},{q:'How do you make a tissue dance?',a:'You put a little boogie in it! 💃'},{q:'What did the ocean say to the beach?',a:'Nothing — it just waved. 🌊'},{q:'Why did the banana go to the party?',a:'Because it was a-peel-ing! 🍌'},{q:'What\u2019s a cloud\u2019s favorite drink?',a:'Thunder-ade. ⛈️'},{q:'Why did the scarecrow win an award?',a:'He was out-standing in his field. 🌾'},{q:'What do you call a dog magician?',a:'A labra-cadabra-dor. 🐶'}];
-const TD_THOUGHTS=['They did that on purpose','Nobody likes me','I can\u2019t do this','Everyone is mad at me','Something bad will happen','It\u2019s not fair'];
-const TD_SURE=['Totally true','Probably true','Not sure','Probably not true','I\u2019d have to ask'];
-const TD_REFRAMES=['Maybe it was an accident','Maybe they were busy or didn\u2019t notice','Maybe they had a hard day too','I could just ask instead of guessing','It might not even be about me','It\u2019s not as big as it feels right now'];
-let td={};
-const WARN=[{e:'🥵',t:'My face feels hot'},{e:'😠',t:'I want to yell'},{e:'😟',t:'My tummy feels worried'},{e:'💓',t:'My heart is racing'},{e:'😢',t:'Tears are coming'},{e:'🌪️',t:'Everything feels like too much'}];
+const FACTS=["Otters hold hands while they sleep so they don\u2019t drift apart.","Honey never spoils — archaeologists found 3,000-year-old honey that\u2019s still good!","A group of flamingos is called a \u2018flamboyance\u2019.","Octopuses have THREE hearts and BLUE blood.","Bananas are berries, but strawberries aren\u2019t!","A cloud can weigh more than a million pounds.","Cows have best friends and get sad when they\u2019re apart.","Sea otters keep a favorite rock in a little pocket of skin under their arm.","Wombat poop is cube-shaped!","Butterflies taste with their FEET.","Sharks existed before trees did.","There are more stars in space than grains of sand on every beach on Earth.","A jiffy is a real unit of time — one hundredth of a second.","Sloths can hold their breath longer than dolphins can.","A snail can sleep for three years.","Elephants are the only animal that can\u2019t jump.","Your nose can remember about 50,000 different smells.","A group of pugs is called a grumble.","Hummingbirds are the only birds that can fly backwards.","Koalas have fingerprints almost identical to humans.","The heart of a blue whale is as big as a small car.","Rats laugh when you tickle them.","Penguins propose with a pebble.","A day on Venus is longer than a year on Venus.","Cats have almost 100 different sounds; dogs have about 10.","Sea otters have the thickest fur of any animal — a million hairs per square inch.","The Eiffel Tower can grow six inches taller in summer.","Bees can recognize human faces.","Some turtles can breathe through their back ends.","A cow\u2019s spots are like fingerprints — no two are the same.","Squirrels forget where they bury thousands of nuts, which plants new trees.","There\u2019s a species of jellyfish that may be immortal.","Goats have accents that change depending on their group.","Baby elephants suck their trunks like kids suck their thumbs."];
+const JOKES=[{q:'What do you call a sleeping dinosaur?',a:'A dino-snore! 🦕'},{q:'Why did the bicycle fall over?',a:'It was two-tired. 🚲'},{q:"What do you call cheese that isn\u2019t yours?",a:'Nacho cheese! 🧀'},{q:'Why did the math book look sad?',a:'It had too many problems. 📓'},{q:"What\u2019s orange and sounds like a parrot?",a:'A carrot. 🥕'},{q:"Why can\u2019t you give Elsa a balloon?",a:"Because she\u2019ll let it go. 🎈"},{q:'What do you call a bear with no teeth?',a:'A gummy bear! 🐻'},{q:'Why did the cookie go to the doctor?',a:'It was feeling crumb-y. 🍪'},{q:'What do you call a fish wearing a bowtie?',a:'So-fish-ticated. 🐟'},{q:'How do you make a tissue dance?',a:'You put a little boogie in it! 💃'},{q:'What did the ocean say to the beach?',a:'Nothing — it just waved. 🌊'},{q:'Why did the banana go to the party?',a:'Because it was a-peel-ing! 🍌'},{q:"What\u2019s a cloud\u2019s favorite drink?",a:'Thunder-ade. ⛈️'},{q:'Why did the scarecrow win an award?',a:'He was out-standing in his field. 🌾'},{q:'What do you call a dog magician?',a:'A labra-cadabra-dor. 🐶'},{q:'What do you call a pile of cats?',a:'A meow-ntain. 🐱'},{q:"Why don\u2019t eggs tell jokes?",a:"They\u2019d crack each other up. 🥚"},{q:'What has ears but cannot hear?',a:'A cornfield. 🌽'},{q:'Why was the broom late?',a:'It over-swept. 🧹'},{q:'What do you call a sad strawberry?',a:'A blueberry. 🍓'},{q:'How do you catch a squirrel?',a:'Climb a tree and act like a nut. 🐿️'},{q:'What do you call a boomerang that does not come back?',a:'A stick. 🪃'},{q:'Why did the golfer bring two pairs of pants?',a:'In case he got a hole in one. ⛳'},{q:'What kind of shoes do frogs wear?',a:'Open toad sandals. 🐸'},{q:'Why did the picture go to jail?',a:'It was framed. 🖼️'},{q:'What do you call a snowman in July?',a:'A puddle. ⛄'}];
+const DISTRACT_IDEAS=['Count everything blue in the room 🔵','Make up a silly song about your day 🎵','Name 10 animals that start with S 🦔','Try to touch your nose with your tongue 👅','Draw with your eyes closed 🎨','Balance on one foot as long as you can 🦩','Think up the weirdest ice cream flavor 🍦','Say the alphabet in a robot voice 🤖','Pretend you are a news reporter for one minute 🎤','Plan your dream treehouse 🌳'];
+const WARN=[{e:'🥵',t:'My face feels hot'},{e:'😠',t:'I want to yell'},{e:'😟',t:'My tummy feels worried'},{e:'💓',t:'My heart is racing'},{e:'😢',t:'Tears are coming'},{e:'🌪️',t:'Everything feels like too much'},{e:'😕',t:'I feel left out'},{e:'⚖️',t:'Something feels unfair'},{e:'🚫',t:'Someone told me no'},{e:'✊',t:'My hands are in fists'},{e:'😖',t:'I want to hide'},{e:'🗯️',t:'I want to say something mean'}];
 const FEARS=[
-  {e:'🌙',t:'The dark / bedtime'},
-  {e:'⛈️',t:'Thunderstorms'},
-  {e:'🔊',t:'Loud noises (fireworks, alarms)'},
-  {e:'🐶',t:'Dogs or other animals'},
-  {e:'🐛',t:'Bugs or spiders'},
-  {e:'🧍',t:'Being away from my grown-up'},
-  {e:'🛌',t:'Sleeping somewhere new'},
-  {e:'🗣️',t:'Speaking up or raising my hand'},
-  {e:'🆕',t:'Trying something new'},
-  {e:'🤢',t:'Getting sick or throwing up'},
-  {e:'💉',t:'Doctors, dentists, or shots'},
-  {e:'😬',t:'Making a mistake'},
+  {e:'🌙',t:'The dark / bedtime',steps:['Talk about it with someone I trust','Sit in a dim room with a nightlight','Have the light off for 1 minute with a grown-up nearby','Sleep with the door open instead of the light on','Make a cozy bedtime plan for tonight']},
+  {e:'⛈️',t:'Thunderstorms',steps:['Talk about what thunder actually is','Watch a storm from a window with a grown-up','Listen to storm sounds quietly for 1 minute','Count the seconds between lightning and thunder','Make a cozy storm kit (blanket, book, headphones)']},
+  {e:'🔊',t:'Loud noises (fireworks, alarms)',steps:['Talk about what makes the noise','Look at a picture or video with the sound low','Turn the sound up a little, just for a moment','Try it with headphones or ear protection','Stand a little closer next time it happens']},
+  {e:'🐶',t:'Dogs or other animals',steps:['Look at pictures of friendly dogs','Watch a dog from far away','Stand near a calm dog on a leash','Ask the owner if I can say hi','Pet a calm dog with a grown-up next to me']},
+  {e:'🐛',t:'Bugs or spiders',steps:['Look at a picture of one','Look at a real one through a window or jar','Stand in the same room as one','Stay while a grown-up moves it outside','Watch one for 10 seconds without moving away']},
+  {e:'🧍',t:'Being away from my grown-up',steps:['Be in a different room for 2 minutes','Play alone for 10 minutes','Stay with a trusted person for a short visit','Make a goodbye plan we do every time','Try a longer time, with a plan to check in']},
+  {e:'🛌',t:'Sleeping somewhere new',steps:['Talk about where I will sleep','Visit the room in the daytime','Bring something cozy from home','Practice with a nap or an early bedtime','Try one whole night with a check-in plan']},
+  {e:'🗣️',t:'Speaking up or raising my hand',steps:['Practice saying it out loud at home','Whisper the answer to a friend','Raise my hand once, even if I am not picked','Answer one question I know for sure','Ask the teacher a question']},
+  {e:'🆕',t:'Trying something new',steps:['Watch someone else do it first','Ask one question about it','Try it for 10 seconds','Try it once, all the way','Try it again on a different day']},
+  {e:'🤢',t:'Getting sick or throwing up',steps:['Talk about what my body is doing','Name the worry out loud to a grown-up','Practice slow breathing when my tummy flips','Do one normal thing anyway (eat a snack, go to school)','Make a plan for what I would do if it happened']},
+  {e:'💉',t:'Doctors, dentists, or shots',steps:['Talk about what will happen, step by step','Look at the room or a picture of it','Practice sitting in the chair','Squeeze a hand and breathe out slowly during it','Plan something nice for after']},
+  {e:'😬',t:'Making a mistake',steps:['Name one mistake I already survived','Say "mistakes help me learn" out loud','Try something on purpose that I might get wrong','Tell someone about a mistake I made','Fix one mistake calmly, without hiding it']},
+  {e:'🏊',t:'Deep water or swimming',steps:['Sit at the edge with my feet in','Stand where I can touch','Put my face in for 3 seconds','Float with a grown-up holding on','Swim a short distance with someone nearby']},
+  {e:'🎢',t:'Heights or fast rides',steps:['Look up at it from the ground','Watch someone else ride','Stand on a low step or small height','Try a smaller version of the ride','Try it once with someone I trust']},
 ];
-const FAITH=[
-  {msg:'Even the tiniest sparrow is watched over and cared for — and you matter so much more than a sparrow. You are never alone with a big feeling.',ref:'a gentle old promise'},
-  {msg:'You can be brave and strong, because you are not carrying this by yourself. Help is always near.',ref:'a verse about courage'},
-  {msg:'When your heart feels heavy, you can hand the worry over and rest. You don\u2019t have to hold it all.',ref:'a verse about peace'},
+const FAITH_LIGHT=[
+  {msg:"Treat other people the way you\u2019d want to be treated — and that includes treating yourself kindly too.",ref:'the Golden Rule'},
+  {msg:'You are loved. Not for what you did today, or how well you did it. Just because you are you.',ref:'a reminder worth keeping'},
+  {msg:'Being angry does not make you bad. What you do next is what matters — and you can always start again.',ref:'a fresh start, any day'},
+  {msg:'It is okay to not be okay. You are not carrying this by yourself.',ref:'a quiet truth'},
+  {msg:'You were made on purpose. Every part of you is there for a reason. You are not a mistake — you are a plan.',ref:'something to hold onto'},
+  {msg:'You do not have to be "too much" or "not enough." You are exactly who you were meant to be.',ref:'a gentle reminder'},
+  {msg:'When everything feels loud inside, you can be still. You are safe, and you are held.',ref:'a moment of quiet'},
+  {msg:'Kindness given away always comes back around. Start with a little for yourself.',ref:'the Golden Rule'},
 ];
+const FAITH_MEDIUM=[
+  {msg:'Even on hard days, God loves you. Always. Nothing you do or don\u2019t do changes that.',ref:'"The Lord is near to the brokenhearted." — Psalm 34:18'},
+  {msg:'You don\u2019t have to be happy, or grateful, or anything special right now. You are loved exactly as you are.',ref:'"I have loved you with an everlasting love." — Jeremiah 31:3'},
+  {msg:'On rough days, God is even closer. He does not pull away when you are sad — he stays.',ref:'"He will never leave you nor forsake you." — Deuteronomy 31:6'},
+  {msg:'You are precious. Not because of what you did — just because you are you.',ref:'"You are precious in my sight, and I love you." — Isaiah 43:4'},
+  {msg:'It is okay to not be okay. You can hand the worry over and rest.',ref:'"Cast all your anxiety on him, because he cares for you." — 1 Peter 5:7'},
+  {msg:'God made you on purpose. He is glad you are here today, even if today was hard.',ref:'"You are fearfully and wonderfully made." — Psalm 139:14'},
+  {msg:'Even the tiniest sparrow is watched over and cared for — and you matter so much more than a sparrow.',ref:'"You are worth more than many sparrows." — Matthew 10:31'},
+  {msg:'You can be brave and strong, because you are not carrying this alone.',ref:'"Be strong and courageous. Do not be afraid." — Joshua 1:9'},
+  {msg:'Being angry does not make you bad. Every morning is a brand-new start.',ref:'"His mercies are new every morning." — Lamentations 3:23'},
+  {msg:'When everything feels loud inside, you can be still. You are safe, and you are held.',ref:'"Be still, and know that I am God." — Psalm 46:10'},
+];
+const FAITH_HIGH=[
+  {msg:'Before you take one more breath, hear this: Jesus loves you. Not the version of you who behaved today — you, right now, exactly as you are.',ref:'"The Lord is near to the brokenhearted, and saves the crushed in spirit." — Psalm 34:18',pray:'Jesus, thank you for loving me even on my hardest days. Help me feel you close right now. Amen.'},
+  {msg:'God made you on purpose, with his own hands, and he calls his work good. The parts that feel different? He put those there too.',ref:'"You are fearfully and wonderfully made." — Psalm 139:14',pray:'God, thank you for making me on purpose. Help me see myself the way you see me. Amen.'},
+  {msg:'You don\u2019t have to hold this by yourself. You can hand the whole heavy thing over — he wants to carry it.',ref:'"Cast all your anxiety on him, because he cares for you." — 1 Peter 5:7',pray:'God, I\u2019m giving you this worry. It\u2019s too big for me. Please hold it. Amen.'},
+  {msg:'Being angry doesn\u2019t make you bad. God isn\u2019t disappointed in you. Every single morning, he hands you a brand-new start.',ref:'"His mercies are new every morning; great is your faithfulness." — Lamentations 3:23',pray:'God, thank you that I get to start fresh. Help me be kind with my next choice. Amen.'},
+  {msg:'When you are scared, you are not alone in it. He goes ahead of you, and he stays beside you.',ref:'"Be strong and courageous... for the Lord your God goes with you." — Joshua 1:9',pray:'God, I feel scared. Please give me courage for the very next step. Amen.'},
+  {msg:'Even the smallest sparrow is watched over and fed. And God says you are worth so much more than a sparrow.',ref:'"You are worth more than many sparrows." — Matthew 10:31',pray:'Jesus, thank you that you see me and you know exactly what I need. Amen.'},
+  {msg:'When everything inside you feels loud, you can stop fighting it for a second. Be still. He is right here.',ref:'"Be still, and know that I am God." — Psalm 46:10',pray:'God, quiet my heart. Help me be still with you for a minute. Amen.'},
+  {msg:'Nothing — not one thing you feel, or think, or did today — can pull you away from how much God loves you.',ref:'"Nothing can separate us from the love of God." — Romans 8:38-39',pray:'God, thank you that your love for me never runs out. Amen.'},
+];
+function faithBank(){return state.faithLevel==='high'?FAITH_HIGH:state.faithLevel==='medium'?FAITH_MEDIUM:FAITH_LIGHT;}
+function faithOn(){return state.faithLevel&&state.faithLevel!=='none';}
 const PEOPLE=[
   {s:'Your friend laughed when you tripped, then said "you okay?" and helped you up.',best:'joke',note:'They laughed, but they checked on you and helped — that points to a friendly laugh, not a mean one.'},
   {s:'Two friends were whispering and looked over at you.',best:'unsure',note:'This one is really hard to know! Whispering near you could be about anything. When you can\u2019t tell, you can ask instead of guessing the worst.'},
   {s:'You said hi and your friend walked right past without answering.',best:'busy',note:'They might not have heard you, or had a lot on their mind. People miss things — it usually isn\u2019t about you.'},
   {s:'Someone bumped your tower and it fell, then said "oh no, sorry!"',best:'accident',note:'It fell — but "sorry" and "oh no" tell you they didn\u2019t mean to.'},
   {s:'A kid said "your shoes are... interesting" and smirked, and kept going after you went quiet.',best:'unkind',note:'A friendly joke STOPS when it stops being fun for you. Going on after you went quiet crossed a line — your feelings about that are right.'},
-  {s:'A friend said "I really like Emily\u2019s drawing."',best:'kind',note:'That\u2019s a kind thing said about someone else — not a put-down of you. Liking one thing doesn\u2019t mean disliking yours.'},
+  {s:'A friend said "I really like Mia\u2019s drawing."',best:'kind',note:'That\u2019s a kind thing said about someone else — not a put-down of you. Liking one thing doesn\u2019t mean disliking yours.'},
+  {s:'A kid copied your drawing style and said "yours is so cool, I want to try it."',best:'kind',note:'Copying can feel weird — but they told you WHY: they liked it. That is a compliment.'},
+  {s:'Your friend picked someone else to be their partner today.',best:'busy',note:'Being picked second stings. But one choice on one day usually is not a message about you — friends mix it up.'},
+  {s:'Someone took the last cookie without asking you first.',best:'unsure',note:'Maybe they didn\u2019t know you wanted it. Maybe they weren\u2019t thinking. You can say "hey, I wanted one" instead of guessing they were mean.'},
+  {s:'A friend cancelled your playdate at the last minute.',best:'busy',note:'Plans change for all kinds of reasons — sickness, family stuff. Disappointed is fair. Assuming they don\u2019t like you is a guess.'},
+  {s:'Your sister came in your room without knocking and you yelled.',best:'accident',note:'She probably forgot. And your yell? That was your Tangle jumping in fast. Both things can be true.'},
+  {s:'A kid on the playground said "you can\u2019t play with us" and turned away.',best:'unkind',note:'That was unkind, and it hurts. You can find someone else to play with — and tell a grown-up if it keeps happening.'},
+  {s:'Your teacher said "let\u2019s try that again" after your answer.',best:'kind',note:'Teachers say that to help, not to shame. It means they think you CAN get it.'},
+  {s:'A friend didn\u2019t text you back all afternoon.',best:'busy',note:'People put their phones down. Silence is not a message. You can ask them tomorrow.'},
+  {s:'Someone laughed right after you answered in class.',best:'unsure',note:'You cannot know what they laughed at — it might have been something else entirely. Hard to tell without asking.'},
+  {s:'Your friend gave your snack away without asking.',best:'unsure',note:'That is worth speaking up about. It could be thoughtless rather than mean — you can ask them why.'},
 ];
 const BUCKETS=[{id:'joke',e:'😄',l:'A friendly joke'},{id:'accident',e:'🤷',l:'An accident'},{id:'busy',e:'🌀',l:'They were busy'},{id:'kind',e:'💛',l:'Something kind'},{id:'unsure',e:'🤔',l:'Hard to tell — I could ask'},{id:'unkind',e:'💔',l:'That was actually unkind'}];
+const CJ_BUCKETS=[{id:'comment',e:'👀',l:'A comment (just noticing)'},{id:'question',e:'❓',l:'A question'},{id:'aboutother',e:'🙂',l:'About someone else, not me'},{id:'judgment',e:'💔',l:'A judgment (good or bad)'}];
+const COMMENT_SCENES=[
+  {s:'A friend says: "Your shirt is purple today."',best:'comment',note:'They are <b>just noticing</b> — that is what a comment is. Not good, not bad. Purple is just purple.'},
+  {s:'Someone says: "Your hair is in a ponytail."',best:'comment',note:'A comment, not a judgment. They are just saying what they see.'},
+  {s:'Someone says: "You\u2019re younger than me."',best:'comment',note:'A simple fact — they are noticing, not putting you down. (Even if it stings a little!)'},
+  {s:'Your teacher says: "You drew that really fast."',best:'comment',note:'A comment. "Fast" is just describing — not saying fast is good or bad.'},
+  {s:'Someone asks: "Why did you do it that way?"',best:'question',note:'A <b>question</b>, not a judgment. People ask questions to understand. You can just answer: "I tried it this way."'},
+  {s:'A friend says: "Are you mad?"',best:'question',note:'A question, not an accusation. They might be checking on you.'},
+  {s:'A friend asks: "Do you want to go first or second?"',best:'question',note:'Just a question — they are giving you a choice, not judging you.'},
+  {s:'Your classmate got picked first for the team today.',best:'aboutother',note:'This is not even about you. Tangle might say "they like her better!" — but really, it is one moment of one game.'},
+  {s:'A friend says: "I really like Mia\u2019s drawing."',best:'aboutother',note:'A <b>comment about Mia\u2019s drawing</b> — not a judgment of yours. Liking one thing does not mean disliking another.'},
+  {s:'A kid says: "That shirt looks weird on you."',best:'judgment',note:'That IS a judgment — they decided "weird" about something on you. Your feelings about that are right.'},
+  {s:'Someone says: "Your drawing is bad."',best:'judgment',note:'A judgment. "Bad" is a put-down, not a description. You can speak up.'},
+  {s:'A kid says: "You always mess things up."',best:'judgment',note:'A judgment — and not a true one. "Always" is almost never true. You can tell a grown-up.'},
+];
+const BOUNDARY_LINES=['"That one didn\u2019t feel good to me. Please stop."','"I know you\u2019re joking, but I don\u2019t like that joke."','"I need a minute — that hurt my feelings."','"Please don\u2019t talk about me like that."','"I want to keep being friends, and that wasn\u2019t kind."','"Stop. I don\u2019t like that."'];
+const DETQ=[
+  {n:1,tag:'Q1: HOW BIG IS IT?',title:'How big is this problem, really?',why:'Sometimes a big feeling makes a small thing feel huge. What size do you actually think it is?',ph:'Is this a tiny thing, a medium thing, or a really big thing? Why?'},
+  {n:2,tag:'Q2: IS IT TRUE?',title:'Is what you\u2019re thinking actually true?',why:'Tangle is fast, but Tangle guesses. What do you really KNOW, and what are you guessing?',ph:'What do you know for sure? What might be a guess?'},
+  {n:3,tag:'Q3: IS IT A BAD THING?',title:'Even if it IS true... is it actually bad?',why:'Sometimes something is just different — not bad.',ph:'Is it really a bad thing, or just not your favorite?'},
+  {n:4,tag:'Q4: CAN YOU CHANGE IT?',title:'Is this something you can change?',why:'If you CAN do something — what a relief! If you can\u2019t, staying mad won\u2019t change it.',ph:'What part is up to YOU? What part isn\u2019t?'},
+  {n:5,tag:'Q5: WHAT WOULD YOU TELL A FRIEND?',title:'What would you tell a friend who thought this?',why:'We are usually kinder to friends than to ourselves. Try being that kind to you.',ph:'If my friend said this about themselves, I would tell them...'},
+];
+const TD_THOUGHTS=['They did that on purpose','Nobody likes me','I can\u2019t do this','Everyone is mad at me','Something bad will happen','It\u2019s not fair','They are talking about me','I never get my way','I always mess up','They don\u2019t want me around','I\u2019m going to be in trouble','Everyone else is better at this'];
+const DOOVER=['Taken a deep breath first 🎈','Walked away to cool off 🚶','Asked a grown-up for help 🙋','Used a calm-down tool 🧰','Said how I felt with words 🗣️','Counted to 10 in my head 🔢','Stepped away to my cozy spot 🛋️','Told them it hurt my feelings 💬'];
+const CONTROLLED=['I tried hard','I used my words','I asked for help','I walked away','I stayed calm','I told the truth','I tried a tool','I came back here','I said sorry'];
+const AFTER_Q=[
+  {key:'where',tag:'WHERE WERE YOU?',q:'Where did it happen?',chips:['Home 🏠','My room 🛏️','School 🏫','In the car 🚗',"A friend\u2019s house 🏡",'Outside 🌳','At an activity ⚽','At church ⛪','A store 🛒','Somewhere else ✨']},
+  {key:'who',tag:'WHO WAS THERE?',q:'Who was with you?',chips:['Mom 💗','Dad 💙','A brother or sister 🧒','A friend 🎒','A group of friends 👯','A family member 👪','A teacher 🍎','A coach 📣','Just me 🙂']},
+  {key:'did',tag:'WHAT DID YOU DO?',q:'What did you do?',sub:'Just honest — no judging. Tap all that happened.',chips:['Yelled 😣','Cried 😢','Clenched my fists ✊','Stomped off 👣','Said something mean 💢','Slammed a door 🚪','Threw something 🧸','Went quiet 🤐','Walked away 🚶','Hid 🫣','Asked for help 🙋','Used a calm-down tool 🧰']},
+  {key:'fast',tag:'THOUGHTFUL OR FAST?',q:'Was that thoughtful, or did it happen fast?',single:true,chips:['Thoughtful 🧠','A bit of both 🤔','It happened fast ⚡']},
+  {key:'why',tag:'WHAT SET IT OFF?',q:'What started the big feeling?',chips:['Someone said no 🚫','Felt left out 😕','Felt picked on 😠','Felt teased 🙄','Something felt unfair ⚖️','Didn\u2019t get my way 😤','Something scared me 😨','I was tired or hungry 😴','I made a mistake 😬','I don\u2019t know 🤷']},
+];
+const GRAT_CHIPS=['What made you smile today?','Who was nice to you today?','What was the best part of today?','I had fun when...','I felt happy when...','I liked it when...','Today I got to...','I\u2019m glad about...','Today I noticed...','A good thing today was...','Someone I love is...'];
+const CHECKINS=[{e:'😄',t:'Great'},{e:'🙂',t:'Okay'},{e:'😐',t:'Meh'},{e:'😟',t:'Worried'},{e:'😠',t:'Mad'},{e:'😢',t:'Sad'}];
+const CHEERS=['You did that. Not me — you.','I am so proud of you right now.','That was real work, and you finished it.','Every time you practice, it gets a little easier.','You are braver than you were yesterday.','Look at you, using your tools!','That is exactly what strong looks like.','You showed up, even when it was hard.','I knew you could. And you did.','Big feelings, bigger you. 💜'];
+const ENCOURAGE=['Whatever today is, we can take it one moment at a time.','You do not have to be perfect here. Just here.','Even coming back today counts.','Some days are heavy. You are not alone in it.','You are allowed to feel this AND be okay.','Nothing you feel today makes you any less loved.'];
 function feelWord(v){if(v<=1)return['Calm','#3fd6a8'];if(v<=3)return['A little bugged','#7fce6a'];if(v<=5)return['Frustrated','#ffc23f'];if(v<=7)return['Pretty big','#ff8a3f'];if(v<=9)return['Really big','#ff5b6e'];return['Huge','#e23a5e'];}
 
 /* ---- timer ---- */
@@ -399,6 +480,8 @@ renderers.crisis=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span c
 /* ---- About / Parent Info (reachable from home; ungated) ---- */
 renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><span class="step-tag">ABOUT &amp; PARENT INFO 💜</span>
   <div class="step-title">About Brave Battle</div>
+  <div class="card" style="background:linear-gradient(160deg,#f6e9ff,#fff6df)"><h3>Battle Big Feelings, Together</h3>
+    <p>Helping children regulate their emotions, build confidence, and find coping skills that work for them — through tools they actually want to use, that capture real data from real moments to inform families, therapists, and kids together. Made accessible to every family who needs it.</p></div>
   <div class="card"><h3>About Brave Battle</h3>
     <p>Brave Battle is a tester app provided by Brave Kids United Inc, an Indiana nonprofit corporation. It is designed to help children practice coping skills and build confidence when working through everyday emotional challenges such as anxiety and worry.</p>
     <p style="margin-top:8px">This is an early tester version. The real app, when fully launched, will include personalized features, character design, faith-level options, parent and therapist tools, and much more.</p></div>
@@ -424,11 +507,11 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
     Brave Kids United Inc is a nonprofit corporation registered in the State of Indiana.</p></div>
   <button class="btn" onclick="goBack()">Back</button></div>`;};
 
-/* ---- onboarding (two steps: meet Pip + name, then meet Tangle) ---- */
+/* ---- onboarding (two steps: meet Bloom + name, then meet Tangle) ---- */
 renderers.onboard=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:6vh;text-align:center">
   <span class="step-tag">WELCOME 👋</span>
   <div class="duo" style="margin-top:12px">${pip('',172)}</div>
-  <div class="step-title" style="font-size:32px;margin-top:4px">Hi! I\u2019m Pip.</div>
+  <div class="step-title" style="font-size:32px;margin-top:4px">Hi! I\u2019m Bloom.</div>
   <div class="step-sub" style="max-width:300px;margin:8px auto 0">I\u2019m your buddy for big feelings — big mad OR big worry. We\u2019ll take things one small step at a time, together.</div>
   <div class="card" style="margin-top:20px">
     <h3 style="text-align:center">What should I call you?</h3>
@@ -447,7 +530,23 @@ renderers.meetTangle=()=>{screen.innerHTML=`<div class="pad fade" style="padding
   <button class="btn" onclick="go('home')">Let\u2019s go to the clubhouse ›</button></div>`;};
 
 /* ---- greeting ---- */
-function greeting(streak,u){const p=["Hi, I\u2019m <b>Pip</b>. I\u2019m so glad you came today.","Hey friend — whatever today is, I\u2019m right here with you.","We can take this one moment at a time, together."];
+function checkedInToday(){const t=todayKey();return (state.moods||[]).some(m=>m.day===t);}
+function todayMood(){const t=todayKey();return (state.moods||[]).find(m=>m.day===t)||{e:'🙂',t:'Okay'};}
+function doCheckin(i){const c=CHECKINS[i];if(!state.moods)state.moods=[];
+  state.moods.unshift({day:todayKey(),ts:Date.now(),e:c.e,t:c.t});
+  if(state.moods.length>200)state.moods=state.moods.slice(0,200);
+  award(PTS.checkin);recordUsageDay();save();cachedGreeting=null;
+  const low=(c.t==='Worried'||c.t==='Mad'||c.t==='Sad');
+  screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:34px">${c.e}</div>
+    <h2>Thanks for telling me.</h2>
+    <div class="duo" style="margin:10px 0">${pip('happy',100)}</div>
+    <div class="big">${low?'That\u2019s a hard way to feel. I\u2019m really glad you said it out loud. Want to use a tool together?':'I love hearing that. Let\u2019s keep the good going!'}</div>
+    <div class="pointpop">+${PTS.checkin} ⭐</div>
+    ${low?`<button class="btn" style="max-width:260px" onclick="go('helpNow')">Yes, help me now 🔥</button>
+      <button class="btn ghost" style="max-width:260px" onclick="go('home')">I\u2019m okay for now</button>`
+    :`<button class="btn" style="max-width:260px" onclick="go('sunshine')">Go to Sunshine ☀️</button>
+      <button class="btn ghost" style="max-width:260px" onclick="go('home')">Back home</button>`}</div>`;burst();}
+function greeting(streak,u){const p=["Hi, I\u2019m <b>Bloom</b>. I\u2019m so glad you came today.","Hey friend — whatever today is, I\u2019m right here with you."].concat(ENCOURAGE);
   if(streak>=3)p.push(`That\u2019s <b>${streak} days in a row</b> you\u2019ve come back. Showing up like that is real.`);
   if(u.week>=5)p.push(`You\u2019ve used your tools <b>${u.week} times this week</b>. You keep trying, even when it\u2019s hard.`);
   if(state.totalPoints>=40)p.push("Look at all you\u2019ve practiced. The brave you is growing every day.");
@@ -458,13 +557,18 @@ function greeting(streak,u){const p=["Hi, I\u2019m <b>Pip</b>. I\u2019m so glad 
 /* ---- home ---- */
 renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cachedGreeting)cachedGreeting=greeting(streak,u);
   screen.innerHTML=`<div class="toprow"><div class="streakpill" title="day streak">🔥 ${streak}</div><div class="spacer"></div><div class="pointchip">⭐ ${state.points}</div></div>
-  <div class="pad fade"><div style="text-align:center"><div class="hero-name">Brave Battle</div><div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
+  <div class="pad fade"><div style="text-align:center"><div class="hero-name">Brave Battle</div>
+    <div style="font-size:11.5px;font-weight:800;color:var(--ink-soft);letter-spacing:.06em;margin-top:-2px">BATTLE BIG FEELINGS, TOGETHER</div>
+    <div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
     <div class="duo" style="margin-top:4px">${pip('',120)}</div>
     <div class="speech">${cachedGreeting}</div>
     <div class="statrow">
       <div class="statcard"><div class="statnum">${u.day}</div><div class="statlbl">TODAY</div></div>
       <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
       <div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">ALL TIME</div></div></div>
+    ${checkedInToday()?`<div class="card" style="text-align:center;margin-top:12px"><p style="font-weight:800">Today you said you feel ${esc(todayMood().e)} ${esc(todayMood().t)}</p></div>`
+      :`<div class="card" style="margin-top:12px"><h3 style="text-align:center">How are you today?</h3>
+        <div class="chipwrap" style="justify-content:center;margin-top:8px">${CHECKINS.map((c,i)=>`<button class="chip" onclick="doCheckin(${i})">${c.e} ${c.t}</button>`).join('')}</div></div>`}
     <div style="height:6px"></div>
     <button class="door before" onclick="go('feelComing')"><div class="emoji">🌤️</div><div><div class="dt">I feel it coming</div><div class="ds">Catch a big feeling early</div></div></button>
     <button class="door during" onclick="go('helpNow')"><div class="emoji">🔥</div><div><div class="dt">I need help NOW</div><div class="ds">It\u2019s big right now</div></div></button>
@@ -509,7 +613,7 @@ function earlyDo(i){const s=window._early[i];flow.tool=s.t;if(s.id==='balloon')g
 function afterEarly(){go('rate',{when:'after'});}
 function simpleDo(e,label,nextFn){screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
   <span class="step-tag">TRY IT</span><div style="font-size:48px;margin-top:14px">${e}</div><div class="step-title">${esc(label)}</div>
-  <div class="card"><p>Go ahead and do it now. Pip is waiting right here. 💜</p></div>
+  <div class="card"><p>Go ahead and do it now. Bloom is waiting right here. 💜</p></div>
   <div class="duo" style="margin:8px auto">${pip('',104)}</div>
   <button class="btn go" onclick="${nextFn}()">I did it! ✅</button></div>`;}
 
@@ -523,17 +627,63 @@ renderers.helpPick=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style
   <div class="bigtool helpme" onclick="justHelp()"><div class="bt-e">💜</div><div class="bt-t">I CAN\u2019T PICK — JUST HELP</div></div>
   <button class="btn ghost" onclick="go('toolList')">Show all my tools</button></div>`;};
 function justHelp(){flow.tool=TOOLS.find(t=>t.id==='balloon');go('breathe',{next:'afterTool'});}
-renderers.toolList=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY TOOLS 🧰</span><div class="step-title">Pick any tool</div>
-  ${TOOLS.map(t=>`<button class="choice" onclick="pickTool('${t.id}')"><span class="ce">${t.e}</span>${esc(t.name)}</button>`).join('')}</div>`;};
+renderers.toolList=()=>{const list=TOOLS.filter(t=>t.kind!=='faith'||faithOn());
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY TOOLS 🧰</span><div class="step-title">Pick any tool</div>
+  ${list.map(t=>`<button class="choice" onclick="pickTool('${t.id}')"><span class="ce">${t.e}</span>${esc(t.name)}</button>`).join('')}</div>`;};
 function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
-  if(t.kind==='breath')go('breathe',{next:'afterTool'});else if(t.kind==='mantra')go('mantra');else if(t.kind==='faith')go('faithTool');else if(t.kind==='distract')go('distract');else go('doTool',{id});}
+  if(t.kind==='breath')go('breathe',{next:'afterTool'});
+  else if(t.kind==='mantra')go('mantra');
+  else if(t.kind==='faith')go('faithTool');
+  else if(t.kind==='distract')go('distract');
+  else if(t.kind==='ground')go('ground',{n:0});
+  else if(t.kind==='squeeze')go('squeeze',{n:0});
+  else if(t.kind==='tell')go('tellWrite');
+  else go('doTool',{id});}
+
+/* ---- 5-4-3-2-1 grounding (guided) ---- */
+const GROUND_STEPS=[{n:5,e:'👀',s:'things you can SEE',ph:'I see...'},{n:4,e:'✋',s:'things you can TOUCH',ph:'I can feel...'},{n:3,e:'👂',s:'things you can HEAR',ph:'I hear...'},{n:2,e:'👃',s:'things you can SMELL',ph:'I smell...'},{n:1,e:'👅',s:'thing you can TASTE',ph:'I taste...'}];
+renderers.ground=(d)=>{const i=d.n,g=GROUND_STEPS[i];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">GROUNDING 🖐️</span>
+  <div style="font-size:52px;margin-top:10px">${g.e}</div>
+  <div class="step-title">Name <span style="color:var(--grape)">${g.n}</span> ${g.s}</div>
+  <div class="step-sub">Say them out loud to Bloom, or just notice them.</div>
+  <div class="duo" style="margin:10px auto">${pip('',92)}</div>
+  <div class="card tip"><p>${g.ph}</p></div>
+  <button class="btn go" onclick="${i<GROUND_STEPS.length-1?`go('ground',{n:${i+1}})`:'afterTool()'}">${i<GROUND_STEPS.length-1?'Got them! Next ›':'All done ✅'}</button>
+  <div class="skipnote">Step ${i+1} of 5 · slow and steady</div></div>`;};
+
+/* ---- squeeze & release (guided muscle relaxation) ---- */
+const SQ_STEPS=[{e:'✊',t:'Your hands',s:'Squeeze both fists tight... hold... now let go.'},{e:'💪',t:'Your arms',s:'Pull your arms in tight like a strong robot... hold... let go.'},{e:'🙆',t:'Your shoulders',s:'Lift your shoulders up to your ears... hold... drop them down.'},{e:'😬',t:'Your face',s:'Scrunch your whole face like a raisin... hold... relax it.'},{e:'🦶',t:'Your legs and feet',s:'Press your feet into the floor, curl your toes... hold... let go.'}];
+renderers.squeeze=(d)=>{const i=d.n,s=SQ_STEPS[i];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">SQUEEZE AND LET GO ✊</span>
+  <div style="font-size:52px;margin-top:10px">${s.e}</div><div class="step-title">${s.t}</div>
+  <div class="card"><p style="font-size:16px">${s.s}</p></div>
+  <div class="step-sub">Squeeze while I count to 5... 1... 2... 3... 4... 5... release. 😮‍💨</div>
+  <div class="duo" style="margin:8px auto">${pip('',92)}</div>
+  <button class="btn go" onclick="${i<SQ_STEPS.length-1?`go('squeeze',{n:${i+1}})`:'afterTool()'}">${i<SQ_STEPS.length-1?'Done — next part ›':'All loose and floppy ✅'}</button>
+  <div class="skipnote">Part ${i+1} of 5</div></div>`;};
+
+/* ---- Tell Bloom about it ---- */
+renderers.tellWrite=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">TELL BLOOM 💬</span>
+  <div class="step-title">I\u2019m listening.</div><div class="duo" style="margin:4px auto">${pip('',100)}</div>
+  <div class="step-sub">Tell me exactly what happened. Nobody is grading this — get it all out.</div>
+  <textarea id="tw" placeholder="What happened? How did it feel?"></textarea>
+  <button class="btn go" onclick="tellDone()">That\u2019s all of it ✅</button>
+  <div class="skipnote">This stays on this device.</div></div>`;};
+function tellDone(){const t=$('tw');flow.told=t?t.value.trim().slice(0,500):'';
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">THANK YOU 💜</span>
+  <div class="duo" style="margin:10px auto">${pip('happy',110)}</div>
+  <div class="step-title">Thank you for telling me.</div>
+  <div class="card"><p>${flow.told?'That sounds really hard. I\u2019m glad you said it out loud instead of holding it in.':'Whenever you\u2019re ready to say it, I\u2019m here.'}</p></div>
+  <div class="card tip"><p>Feelings get smaller when we share them. You just made yours a little smaller.</p></div>
+  <button class="btn go" onclick="afterTool()">I feel a bit lighter ✅</button></div>`;}
 renderers.doTool=(d)=>{const t=TOOLS.find(x=>x.id===d.id);const idea=t.ideas[Math.floor(Math.random()*t.ideas.length)];const secs=t.id==='move'?60:45;const circ=2*Math.PI*86;
   screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">${esc(t.name.toUpperCase())}</span><div class="step-title">Your mission:</div>
   <div class="card"><h3 style="margin:0;text-align:center">${esc(idea)}</h3></div>
   <div class="timer-ring"><svg width="198" height="198"><circle cx="99" cy="99" r="86" stroke="var(--lilac)" stroke-width="20" fill="none"/>
     <circle id="tp" cx="99" cy="99" r="86" stroke="var(--grape)" stroke-width="20" fill="none" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="0"/></svg>
     <div class="timer-mid"><div class="timer-count" id="tc">${secs}</div><div class="timer-label">seconds</div></div></div>
-  <div>${pip('',92)}</div><div style="font-weight:800;color:var(--ink-soft);font-size:13px">Pip is doing it with you!</div>
+  <div>${pip('',92)}</div><div style="font-weight:800;color:var(--ink-soft);font-size:13px">Bloom is doing it with you!</div>
   <button class="btn go" id="db" onclick="afterTool()">I did it! ✅</button>
   <button class="btn ghost" onclick="Timer.stop();go('toolList')">Try a different tool</button></div>`;
   Timer.start(secs,(rem,total)=>{const tc=$('tc'),tp=$('tp');if(tc)tc.textContent=rem>0?rem:'⭐';if(tp)tp.style.strokeDashoffset=circ*(1-rem/total);},()=>{const b=$('db');if(b)b.textContent='All done! Tap here ✅';});};
@@ -558,11 +708,11 @@ renderers.breathe=(d)=>{const next=d.next||'afterTool';
   <div style="font-weight:800;color:var(--ink-soft)" id="bc">3 breaths to go</div>
   <button class="btn go" onclick="${next}()">I feel calmer ✅</button></div>`;
   let cyc=3;const w=$('bw'),c=$('bc'),dot=$('bd');
-  setTimeout(()=>{if(dot)dot.classList.add('go');const tick=()=>{if($('bw')){w.textContent='Breathe in 🌬️';w.style.color='var(--blue)';}
-    setTimeout(()=>{if($('bw')){w.textContent='Hold…';w.style.color='var(--grape)';}},4000);
-    setTimeout(()=>{if($('bw')){w.textContent='Breathe out 🎈';w.style.color='var(--tangerine)';}},4600);};tick();
+  breatheTimers.push(setTimeout(()=>{if(dot)dot.classList.add('go');const tick=()=>{if($('bw')){w.textContent='Breathe in 🌬️';w.style.color='var(--blue)';}
+    breatheTimers.push(setTimeout(()=>{if($('bw')){w.textContent='Hold…';w.style.color='var(--grape)';}},4000));
+    breatheTimers.push(setTimeout(()=>{if($('bw')){w.textContent='Breathe out 🎈';w.style.color='var(--tangerine)';}},4600));};tick();
     const iv=setInterval(()=>{cyc--;if(cyc<=0){clearInterval(iv);if($('bw')){w.textContent='Great job! 💜';w.style.color='var(--mint)';}if($('bc'))c.textContent='You did it!';return;}
-      if($('bc'))c.textContent=cyc+' breath'+(cyc>1?'s':'')+' to go';tick();},8000);},900);};
+      if($('bc'))c.textContent=cyc+' breath'+(cyc>1?'s':'')+' to go';tick();},8000);breatheTimers.push(iv);},900));};
 
 /* ---- mantra / faith tool ---- */
 renderers.mantra=()=>{const all=MANTRAS.concat(state.customMantras||[]);
@@ -573,11 +723,12 @@ renderers.mantra=()=>{const all=MANTRAS.concat(state.customMantras||[]);
   <div id="mbox" style="display:none"><input id="ownm" type="text" placeholder="Write your very own mantra…" maxlength="80"></div>
   <button class="btn go" onclick="saveMantraMaybe();afterTool()">I said it! ✅</button></div>`;};
 function saveMantraMaybe(){const b=$('ownm');if(b&&b.value.trim().length>1){if(!state.customMantras)state.customMantras=[];state.customMantras.push(b.value.trim().slice(0,80));save();}}
-renderers.faithTool=()=>{if(!state.faith){afterTool();return;}const m=FAITH[Math.floor(Math.random()*FAITH.length)];
+renderers.faithTool=()=>{if(!faithOn()){afterTool();return;}const m=pickRandom(faithBank());
   screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">A QUIET MOMENT 💛</span>
   <div class="duo" style="margin:14px auto 6px">${pip('',110)}</div>
   <div class="card" style="background:#fff8e1;text-align:left"><p style="font-size:15.5px;line-height:1.55">${esc(m.msg)}</p>
     <p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:10px;text-align:center">— ${esc(m.ref)}</p></div>
+  ${m.pray?`<div class="card tip" style="text-align:left"><h3>A prayer, if you want it 🙏</h3><p>${esc(m.pray)}</p></div>`:''}
   <button class="btn go" onclick="afterTool()">Amen 💜</button></div>`;};
 
 /* ---- 3) BE BRAVE ---- */
@@ -587,44 +738,78 @@ renderers.bravePick=()=>{flow={section:'brave'};screen.innerHTML=`${topbar()}<di
   <div class="step-sub" style="margin-top:16px">Something else? Type it here:</div>
   <input id="fx" type="text" placeholder="What feels scary…" maxlength="40">
   <button class="btn ghost" onclick="pickFearCustom()">Use my own ›</button></div>`;};
-function pickFear(i){flow.fear=FEARS[i].t;go('rate',{when:'now'});}
-function pickFearCustom(){const v=($('fx').value||'').trim();if(!v){$('fx').focus();return;}flow.fear=v.slice(0,40);go('rate',{when:'now'});}
+function pickFear(i){flow.fear=FEARS[i].t;flow.ladder=FEARS[i].steps||null;go('rate',{when:'now'});}
+function pickFearCustom(){const v=($('fx').value||'').trim();if(!v){$('fx').focus();return;}flow.fear=v.slice(0,40);flow.ladder=null;go('rate',{when:'now'});}
 renderers.braveCalm=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">ONE SMALL STEP</span>
-  <div class="step-title">Comfort first 💜</div><div class="card"><p>First, let\u2019s get calm together. Take a balloon breath with Pip. Then we\u2019ll try just <b>one small brave step</b> — only if you\u2019re ready.</p></div>
+  <div class="step-title">Comfort first 💜</div><div class="card"><p>First, let\u2019s get calm together. Take a balloon breath with Bloom. Then we\u2019ll try just <b>one small brave step</b> — only if you\u2019re ready.</p></div>
   <div style="margin:8px 0">${pip('',104)}</div>
   <button class="btn" onclick="go('breathe',{next:'braveDo'})">🎈 Calm down first</button>
   <button class="btn go" onclick="braveDo()">I\u2019m ready for a brave step ›</button></div>`;};
-function braveDo(){screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">YOUR BRAVE STEP</span>
-  <div class="step-title">Pick one tiny step</div><div class="step-sub">Not the whole scary thing — just a small next step you choose.</div>
-  ${['Talk about it with someone I trust','Look at a picture of it','Get a little closer for 10 seconds','Try it with someone next to me','Make a cozy plan for next time'].map(t=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">🦁</span>${esc(t)}</button>`).join('')}
+function braveDo(){const steps=flow.ladder||['Talk about it with someone I trust','Look at a picture of it','Get a little closer for 10 seconds','Try it with someone next to me','Make a cozy plan for next time'];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">YOUR BRAVE LADDER 🪜</span>
+  <div class="step-title">Pick one tiny step</div>
+  <div class="card"><p style="font-size:13.5px">Facing: <b>${esc(flow.fear||'your brave thing')}</b></p></div>
+  <div class="step-sub">Start at the bottom. You never have to skip ahead — each rung counts.</div>
+  ${steps.map((t,i)=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">${i+1}️⃣</span>${esc(t)}</button>`).join('')}
   <button class="btn go" onclick="go('rate',{when:'after'})">I did my brave step! ✅</button>
   <div class="skipnote">It\u2019s okay if you\u2019re not ready today. Coming back is brave too. 💜</div></div>`;}
 
 /* ---- 4) BE A DETECTIVE (hub: People Detective + Thought Detective) ---- */
 renderers.detectiveHub=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE A DETECTIVE 🔍</span>
-  <div class="step-title">Two kinds of detective work</div><div class="duo" style="margin:6px auto">${pip('',104)}</div>
+  <div class="step-title">Three kinds of detective work</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
   <div class="card"><p>Our brain makes fast <b>guesses</b> — about other people, and about our own worried or mad thoughts. A good detective checks if they\u2019re really true.</p></div>
   <button class="door people" onclick="go('peopleStart')"><div class="emoji">🧩</div><div><div class="dt">People Detective</div><div class="ds">Mean? joke? accident? Read the clues</div></div></button>
-  <button class="door before" onclick="go('thoughtStart')"><div class="emoji">🔎</div><div><div class="dt">Thought Detective</div><div class="ds">Check if a worried or mad thought is true</div></div></button></div>`;};
+  <button class="door before" onclick="go('thoughtStart')"><div class="emoji">🔎</div><div><div class="dt">Thought Detective</div><div class="ds">5 questions to check a tricky thought</div></div></button>
+  <button class="door gratitude" onclick="go('commentStart')"><div class="emoji">💬</div><div><div class="dt">Comment or Judgment?</div><div class="ds">Was it just noticing, or a put-down?</div></div></button></div>`;};
 
-renderers.thoughtStart=()=>{flow={section:'thought'};td={thought:'',sure:'',reframes:[]};
+/* ---- Thought Detective (5 questions) ---- */
+let td={};
+renderers.thoughtStart=()=>{flow={section:'thought'};td={thought:'',answers:[]};
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">THOUGHT DETECTIVE 🔎</span>
-  <div class="step-title">What\u2019s the tricky thought?</div><div class="duo" style="margin:4px auto">${pip('',92)}</div>
+  <div class="step-title">What\u2019s the tricky thought?</div><div class="duo" style="margin:4px auto">${pip('',88)}</div>
   <div class="step-sub">A worried or mad thought that\u2019s bugging you. Tap one, or type your own.</div>
   ${TD_THOUGHTS.map((t,i)=>`<button class="choice" onclick="tdPick(${i})"><span class="ce">💭</span>${esc(t)}</button>`).join('')}
   <input id="tdt" type="text" placeholder="…or type the thought" maxlength="60">
-  <button class="btn" onclick="tdNext()">Next ›</button></div>`;};
+  <button class="btn" onclick="tdNext()">Start the case ›</button></div>`;};
 function tdPick(i){$('tdt').value=TD_THOUGHTS[i];}
-function tdNext(){td.thought=($('tdt').value||'').trim().slice(0,60);go('tdSure');}
-renderers.tdSure=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">CHECK THE CLUE 🔎</span>
-  <div class="step-title">How sure are you it\u2019s true?</div>
-  ${td.thought?`<div class="card"><p>The thought: <b>${esc(td.thought)}</b></p></div>`:''}
-  ${TD_SURE.map((t,i)=>`<button class="choice" onclick="td.sure=TD_SURE[${i}];go('tdReframe')"><span class="ce">🔎</span>${esc(t)}</button>`).join('')}</div>`;};
-renderers.tdReframe=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">LOOK FOR OTHER CLUES 💡</span>
-  <div class="step-title">What else could be true?</div>
-  <div class="step-sub">A good detective looks at every angle. Tap any that could fit.</div>
-  ${TD_REFRAMES.map(t=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">💡</span>${esc(t)}</button>`).join('')}
+function tdNext(){td.thought=($('tdt').value||'').trim().slice(0,60);if(!td.thought){$('tdt').focus();return;}td.answers=[];go('tdQ',{n:0});}
+renderers.tdQ=(d)=>{const i=d.n,q=DETQ[i];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${q.tag}</span>
+  <div class="step-title">${q.title}</div>
+  <div class="card"><p style="font-size:13.5px">The thought: <b>${esc(td.thought)}</b></p></div>
+  <div class="card tip"><p>${q.why}</p></div>
+  <textarea id="tda" placeholder="${esc(q.ph)}"></textarea>
+  <button class="btn" onclick="tdSave(${i})">${i<DETQ.length-1?'Next question ›':'Finish the case ✅'}</button>
+  <div class="skipnote">Question ${i+1} of ${DETQ.length} · you can keep it short</div></div>`;
+  const t=$('tda');if(t&&td.answers[i])t.value=td.answers[i];};
+function tdSave(i){const t=$('tda');td.answers[i]=t?t.value.trim().slice(0,300):'';
+  if(i<DETQ.length-1)go('tdQ',{n:i+1});else go('tdDone');}
+renderers.tdDone=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">CASE CRACKED 🕵️</span>
+  <div class="step-title">Look what you figured out</div><div class="duo" style="margin:6px auto">${pip('happy',96)}</div>
+  <div class="card"><p style="font-size:13.5px">You started with: <b>${esc(td.thought)}</b></p></div>
+  ${DETQ.map((q,i)=>td.answers[i]?`<div class="card"><h3 style="font-size:14px">${esc(q.title)}</h3><p>${esc(td.answers[i])}</p></div>`:'').join('')}
+  <div class="card tip"><p>💜 A thought is not a fact. You just proved you can check one.</p></div>
   <button class="btn go" onclick="finishFlow()">I cracked the case ✅</button></div>`;};
+
+/* ---- Comment or Judgment? ---- */
+renderers.commentStart=()=>{flow={section:'comment',used:[],round:0};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">COMMENT OR JUDGMENT? 💬</span>
+  <div class="step-title">Not everything is a put-down</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
+  <div class="card"><p>A <b>comment</b> is just noticing — "your shirt is purple." A <b>judgment</b> decides good or bad — "your shirt looks weird." Some things are just <b>questions</b>, and some are not even about you!</p></div>
+  <div class="card tip"><p>Tangle hears everything as a judgment. Let\u2019s practice hearing what was really said.</p></div>
+  <button class="btn" onclick="commentRound()">Start practicing ›</button></div>`;};
+function commentRound(){let pool=COMMENT_SCENES.map((_,i)=>i).filter(i=>!flow.used.includes(i));if(!pool.length){pool=COMMENT_SCENES.map((_,i)=>i);flow.used=[];}
+  const idx=pool[Math.floor(Math.random()*pool.length)];flow.used.push(idx);flow.scene=idx;const sc=COMMENT_SCENES[idx];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT WAS THAT? · ${flow.round+1} of 3</span>
+  <div class="card"><p style="font-size:16px">${sc.s}</p></div>
+  <div class="step-sub" style="margin-top:14px">Which one was it?</div>
+  ${CJ_BUCKETS.map(b=>`<button class="choice" onclick="commentPick('${b.id}')"><span class="ce">${b.e}</span>${esc(b.l)}</button>`).join('')}</div>`;}
+function commentPick(id){const sc=COMMENT_SCENES[flow.scene];const good=id===sc.best;
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">${good?'GREAT LISTENING 🌟':'GOOD THINKING 💜'}</span>
+  <div class="duo" style="margin:8px auto">${pip('happy',96)}</div>
+  <div class="card" style="text-align:left"><p>${sc.note}</p></div>
+  ${sc.best==='judgment'?`<div class="card tip" style="text-align:left"><h3>If it WAS a judgment, you can say:</h3><p>${BOUNDARY_LINES.slice(0,3).map(l=>'🗣️ '+esc(l)).join('<br>')}</p></div>`:''}
+  ${flow.round<2?`<button class="btn" onclick="flow.round++;commentRound()">Next one ›</button>`:`<button class="btn go" onclick="finishFlow()">I\u2019m done — nice work! ✅</button>`}</div>`;}
 
 /* ---- 4b) PEOPLE PRACTICE ---- */
 renderers.peopleStart=()=>{flow={section:'people',used:[],round:0};screen.innerHTML=`${topbar()}<div class="pad fade">
@@ -647,14 +832,14 @@ function peoplePick(id){const sc=PEOPLE[flow.scene];const good=id===sc.best;
   ${flow.round<2?`<button class="btn" onclick="flow.round++;peopleRound()">Next situation ›</button>`:`<button class="btn go" onclick="finishFlow()">I\u2019m done — nice work! ✅</button>`}</div>`;}
 
 /* ---- 5) SUNSHINE ---- */
-renderers.sunshine=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">SUNSHINE ☀️</span>
+renderers.sunshine=()=>{sunshineOffered=true;screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">SUNSHINE ☀️</span>
   <div class="step-title">A little warmth</div><div class="duo" style="margin:6px auto">${pip('',104)}</div>
   <div class="card"><p>Two things you can do here — pick whichever fits today.</p></div>
   <button class="door before" onclick="go('gratWrite')"><div class="emoji">🌻</div><div><div class="dt">Good things</div><div class="ds">Notice something good from your day</div></div></button>
-  ${state.faith?`<button class="door gratitude" onclick="go('faithMoment')"><div class="emoji">💛</div><div><div class="dt">Remind me I\u2019m loved</div><div class="ds">A quiet moment</div></div></button>`:''}
+  <button class="door gratitude" onclick="go('lovedMoment')"><div class="emoji">💛</div><div><div class="dt">You Are Loved</div><div class="ds">A quiet moment, just for you</div></div></button>
   ${state.gratitudes.length?`<div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">Things you\u2019ve noticed</div>
     ${state.gratitudes.slice(0,4).map(g=>g.type==='faith'?`<div class="card" style="background:#fff8e1;display:flex;gap:10px;align-items:center"><div style="font-size:20px">💛</div><div style="font-size:13px;font-weight:700;color:var(--ink-soft)">${esc(new Date(g.ts).toLocaleDateString())} · Amen 💜</div></div>`:`<div class="card" style="background:#fffaef"><div style="font-size:11px;font-weight:800;color:var(--ink-soft)">${esc(new Date(g.ts).toLocaleDateString())}</div><div style="font-weight:700;margin-top:3px">🌻 ${esc(g.text)}</div></div>`).join('')}`:''}</div>`;};
-renderers.gratWrite=()=>{const chips=['I felt happy when…','Someone was kind when…','I\u2019m thankful for…','Something fun today was…','A person I love is…','My body felt good when…'];
+renderers.gratWrite=()=>{const chips=GRAT_CHIPS;
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GOOD THINGS 🌻</span>
   <div class="step-title">Tell me about a good part of your day</div><div class="duo" style="margin:4px auto">${pip('',92)}</div>
   <div class="step-sub">Just one thing. Big or small — they all count.</div>
@@ -662,18 +847,45 @@ renderers.gratWrite=()=>{const chips=['I felt happy when…','Someone was kind w
   <div class="step-sub" style="margin-top:12px">Need a starter? Tap one:</div>
   <div class="chipwrap">${chips.map(c=>`<button class="chip" onclick="gratStart('${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join('')}</div>
   <button class="btn" onclick="gratSave()">Save my good thing 🌻</button>
+  <button class="btn ghost" onclick="go('noGood')">I can\u2019t think of one today</button>
   <div class="skipnote">No pressure. Some days are easier than others — both are okay. 💜</div></div>`;};
+renderers.noGood=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
+  <span class="step-tag">THAT\u2019S OKAY 💜</span>
+  <div class="duo" style="margin:14px auto">${pip('',112)}</div>
+  <div class="step-title" style="font-size:25px">Some days there isn\u2019t one.</div>
+  <div class="card" style="text-align:left"><p>And that\u2019s allowed. You don\u2019t have to feel grateful to be okay, and you don\u2019t have to find something good to be worth something.</p>
+    <p style="margin-top:10px">Hard days are just hard. You still showed up here. That counts, and I\u2019m glad you did.</p></div>
+  <div class="card tip"><p>💛 Nothing about today changes how loved you are.</p></div>
+  <button class="btn" onclick="noGoodDone()">Thanks, Bloom 💜</button>
+  <button class="btn ghost" onclick="go('gratWrite')">Actually, I thought of one</button></div>`;};
+function noGoodDone(){award(PTS.sunshine);logSunshine('Came on a hard day');recordUsageDay();save();
+  gentleCeleb('💜 ✨ 💜','You came anyway.','Showing up on a hard day is its own kind of brave.','');}
+function logSunshine(title){state.log.unshift({ts:Date.now(),section:'sunshine',title:title,tool:'',rateBefore:null,rateAfter:null,gotGrownUp:false,reflect:null,pts:PTS.sunshine});
+  if(state.log.length>300)state.log=state.log.slice(0,300);}
 function gratStart(t){const b=$('gt');if(!b)return;b.value=b.value.trim()?b.value.trim()+' '+t+' ':t+' ';b.focus();b.selectionStart=b.selectionEnd=b.value.length;}
-function gratSave(){const b=$('gt');const t=b?b.value.trim():'';if(!t){go('home');return;}state.gratitudes.unshift({ts:Date.now(),text:t,type:'gratitude'});award(1);recordUsageDay();save();
+function gratSave(){const b=$('gt');const t=b?b.value.trim():'';if(!t){go('home');return;}state.gratitudes.unshift({ts:Date.now(),text:t,type:'gratitude'});award(PTS.sunshine);logSunshine('Noticed a good thing');recordUsageDay();save();
   gentleCeleb('🌻 ✨ 🌻','Thank you for sharing.',`"${esc(t)}"`,'Noticing good things is its own kind of brave. 💜');}
-renderers.faithMoment=()=>{const m=FAITH[Math.floor(Math.random()*FAITH.length)];
-  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">A QUIET MOMENT 💛</span>
-  <div class="duo" style="margin:16px auto 6px">${pip('',120)}</div>
-  <div class="card" style="background:#fff8e1;text-align:left"><p style="font-size:16px;line-height:1.55;font-weight:600">${esc(m.msg)}</p>
-    <p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:12px;text-align:center">— ${esc(m.ref)}</p></div>
-  <button class="btn" onclick="faithAmen()">Amen 💜</button></div>`;};
-function faithAmen(){state.gratitudes.unshift({ts:Date.now(),type:'faith'});award(1);recordUsageDay();save();
-  gentleCeleb('💛 ✨ 💛','Amen.','You are loved. Always. 💜','');}
+const LOVED=[
+  'You are loved. Not for what you did today, or how well you did it. Just because you are you.',
+  'Somebody\u2019s day got better because you were in it. That happens more than you know.',
+  'You are allowed to take up space. The world is better with you in it.',
+  'Nothing you felt today made you any less loved. Not one thing.',
+  'You are somebody\u2019s favorite person. Probably more than one somebody.',
+  'Being you is enough. You do not have to earn it.',
+  'On your worst day, you are still worth loving. That never runs out.',
+  'You are braver than you think, kinder than you know, and more loved than you can feel right now.',
+];
+renderers.lovedMoment=()=>{const useFaith=faithOn();const m=useFaith?pickRandom(faithBank()):null;
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">YOU ARE LOVED 💛</span>
+  <div class="duo" style="margin:16px auto 6px">${pip('',118)}</div>
+  <div class="card" style="background:#fff8e1;text-align:left">
+    <p style="font-size:16px;line-height:1.55;font-weight:600">${esc(useFaith?m.msg:pickRandom(LOVED))}</p>
+    ${useFaith?`<p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:12px;text-align:center">— ${esc(m.ref)}</p>`:''}
+  </div>
+  ${useFaith&&m.pray?`<div class="card tip" style="text-align:left"><h3>A prayer, if you want it 🙏</h3><p>${esc(m.pray)}</p></div>`:''}
+  <button class="btn" onclick="lovedDone()">${useFaith?'Amen 💜':'Thank you 💜'}</button></div>`;};
+function lovedDone(){state.gratitudes.unshift({ts:Date.now(),type:'faith'});award(PTS.sunshine);logSunshine('A You Are Loved moment');recordUsageDay();save();
+  gentleCeleb('💛 ✨ 💛',faithOn()?'Amen.':'Take that with you.','You are loved. Always. 💜','');}
 function gentleCeleb(top,title,big,sub){screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:30px">${top}</div>
   <h2>${title}</h2><div class="duo" style="margin:10px 0">${pip('happy',104)}</div>
   <div class="big" style="font-size:16px">${big}</div>${sub?`<div class="big" style="margin-top:8px;font-size:14px">${sub}</div>`:''}
@@ -682,33 +894,73 @@ function gentleCeleb(top,title,big,sub){screen.innerHTML=`<div class="celebrate"
   <button class="btn ghost" style="max-width:260px" onclick="go('sunshine')">Back to Sunshine</button></div>`;burst();}
 
 /* ---- finish + celebrate ---- */
-function finishFlow(){const mode=flow.section==='feelComing'?'warning':flow.section==='helpNow'?'during':flow.section==='brave'?'brave':(flow.section==='people'||flow.section==='thought')?'people':'reflect';
+function finishFlow(){const mode=flow.section==='feelComing'?'warning':flow.section==='helpNow'?'during':flow.section==='brave'?'brave':(flow.section==='people'||flow.section==='thought'||flow.section==='comment')?'people':'reflect';
   const pts=PTS[mode]||1;award(pts);if(state.monsterShrink<6)state.monsterShrink++;recordUsageDay();
   const entry={ts:Date.now(),section:flow.section,title:flow.warn||flow.fear||(flow.section==='helpNow'?'Got help with a big feeling':flow.section==='people'?'Practiced reading people':flow.section==='thought'?(td.thought?('Checked: "'+td.thought+'"'):'Checked a tricky thought'):'A moment'),
-    tool:flow.tool?(flow.tool.name||flow.tool):'',rateBefore:flow.rateBefore!=null?flow.rateBefore:null,rateAfter:flow.rateAfter!=null?flow.rateAfter:null,gotGrownUp:!!flow.gotGrownUp,pts};
+    tool:flow.tool?(flow.tool.name||flow.tool):'',rateBefore:flow.rateBefore!=null?flow.rateBefore:null,rateAfter:flow.rateAfter!=null?flow.rateAfter:null,gotGrownUp:!!flow.gotGrownUp,reflect:flow.reflect||null,pts};
   state.log.unshift(entry);if(state.log.length>300)state.log=state.log.slice(0,300);save();go('celebrate',{entry,pts});}
 renderers.celebrate=(d)=>{const e=d.entry;const pair=e.rateBefore!=null&&e.rateAfter!=null;const dropped=pair&&e.rateAfter<e.rateBefore;const calm=e.rateAfter!=null&&e.rateAfter<4;
-  const labels={feelComing:'You caught a warning sign early!',helpNow:'You used the app while it was big!',brave:'You took a brave step!',people:'You practiced reading people!',thought:'You were a thought detective!'};
+  const labels={feelComing:'You caught a warning sign early!',helpNow:'You used the app while it was big!',brave:'You took a brave step!',people:'You practiced reading people!',thought:'You were a thought detective!',comment:'You listened like a detective!',reflect:'You looked back bravely!'};
   const emo={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎'}[e.section]||'⭐';
   let spec=pair&&dropped?`You came to me at a ${e.rateBefore}, and came down to a ${e.rateAfter}. That took real work.`
     :e.section==='feelComing'?'You caught a warning sign before it got big. That\u2019s the thoughtful you in action.'
     :e.section==='brave'?'You did a brave step today. That\u2019s yours, and no one can take it from you.'
     :e.section==='people'?'You looked at a tricky moment in a fair, kind way. That\u2019s a real skill.'
     :e.section==='thought'?'You checked the clues instead of believing the first thought. A thought is not a fact!'
+    :e.section==='comment'?'You heard what was really said, instead of what Tangle wanted you to hear.'
+    :e.section==='reflect'?'Looking back at a hard moment takes guts. That is how next time gets easier.'
     :'You showed up. That is the work, and you did it.';
+  const cheer=pickRandom(CHEERS);
   screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:26px">${emo} 🎉 ${emo}</div>
     <h2>Way to go!</h2><div class="big" style="font-weight:800;color:var(--grape)">${esc(labels[e.section]||'Great job!')}</div>
     <div class="duo" style="margin:8px 0">${pip('happy',92)}${tangle('',monsterSize()-16,monsterMad())}</div>
     ${pair?`<div class="ratepair"><div class="ratebubble" style="background:${feelWord(e.rateBefore)[1]}">${e.rateBefore}</div><span class="arrow">➜</span><div class="ratebubble" style="background:${feelWord(e.rateAfter)[1]}">${e.rateAfter}</div></div>`:''}
     <div class="big">${esc(spec)}</div>
+    <div class="speech" style="max-width:330px;margin-top:12px;text-align:left">💜 ${esc(cheer)}</div>
     <div class="pointpop">+${d.pts} ⭐</div>
-    <div class="big" style="margin-top:8px;font-size:13px">Tangle got smaller — you and Pip are helping it calm down!</div>
-    ${calm?`<div class="card" style="margin-top:16px;text-align:left;max-width:330px"><h3 style="text-align:center">You\u2019re in a good place 🌟</h3>
+    <div class="big" style="margin-top:8px;font-size:13px">Tangle got smaller — you and Bloom are helping it calm down!</div>
+    ${(calm&&!sunshineOffered)?`<div class="card" style="margin-top:16px;text-align:left;max-width:330px"><h3 style="text-align:center">You\u2019re in a good place 🌟</h3>
       <button class="choice" onclick="go('sunshine')"><span class="ce">☀️</span>Sunshine</button>
       <button class="choice" onclick="go('closet')"><span class="ce">🎩</span>Go to my closet</button></div>
       <button class="btn ghost" style="max-width:260px" onclick="go('home')">Just back home</button>`
       :`<button class="btn" style="max-width:260px" onclick="go('home')">Back home</button>
+        ${e.section==='helpNow'?`<button class="btn ghost" style="max-width:260px" onclick="go('reflectStart')">Tell me what happened 🌈</button>`:''}
         <button class="btn ghost" style="max-width:260px" onclick="go('wins')">See my wins 🏆</button>`}</div>`;burst();};
+
+/* ---- After the storm: reflection + do-over ---- */
+let rf={};
+let sunshineOffered=false; // Sunshine is invited at most once per session, never pushed
+renderers.reflectStart=()=>{flow={section:'reflect'};rf={picks:{},doover:[],controlled:[]};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">AFTER THE STORM 🌈</span>
+  <div class="step-title">Let\u2019s look back — gently</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
+  <div class="card"><p>The storm has passed. Looking back helps us spot what set it off, so next time is easier. <b>No judging</b> — this is just detective work about you.</p></div>
+  <button class="btn" onclick="go('reflectQ',{n:0})">I\u2019m ready ›</button>
+  <button class="btn ghost" onclick="go('home')">Not right now</button></div>`;};
+renderers.reflectQ=(d)=>{const i=d.n,q=AFTER_Q[i];const sel=rf.picks[q.key]||[];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${q.tag}</span>
+  <div class="step-title">${q.q}</div>${q.sub?`<div class="step-sub">${q.sub}</div>`:''}
+  <div class="chipwrap" style="margin-top:14px">${q.chips.map(c=>`<button class="chip ${sel.includes(c)?'on':''}" onclick="rfTap('${q.key}','${c.replace(/'/g,"\\'")}',${q.single?'true':'false'},this)" style="${sel.includes(c)?'background:var(--grape);color:#fff':''}">${esc(c)}</button>`).join('')}</div>
+  <button class="btn" onclick="${i<AFTER_Q.length-1?`go('reflectQ',{n:${i+1}})`:`go('doover')`}">Next ›</button>
+  <div class="skipnote">Step ${i+1} of ${AFTER_Q.length} · skip any you want</div></div>`;};
+function rfTap(key,val,single,el){if(!rf.picks[key])rf.picks[key]=[];
+  if(single){rf.picks[key]=[val];document.querySelectorAll('.chipwrap .chip').forEach(c=>{c.classList.remove('on');c.style.background='';c.style.color='';});}
+  const a=rf.picks[key];const i=a.indexOf(val);
+  if(i>=0&&!single){a.splice(i,1);el.classList.remove('on');el.style.background='';el.style.color='';}
+  else{if(!a.includes(val))a.push(val);el.classList.add('on');el.style.background='var(--grape)';el.style.color='#fff';}}
+renderers.doover=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">THE DO-OVER 🔁</span>
+  <div class="step-title">If you could rewind...</div>
+  <div class="step-sub">What could you try next time? Tap any that could work.</div>
+  ${DOOVER.map(t=>`<button class="choice" onclick="dvTap(this,'${t.replace(/'/g,"\\'")}')"><span class="ce">🔁</span>${esc(t)}</button>`).join('')}
+  <button class="btn" onclick="go('controlled')">Next ›</button>
+  <div class="card tip"><p>💜 A do-over is not a punishment. It is a plan.</p></div></div>`;};
+function dvTap(el,t){el.classList.toggle('on');const i=rf.doover.indexOf(t);if(i>=0)rf.doover.splice(i,1);else rf.doover.push(t);}
+renderers.controlled=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT YOU DID WELL ⭐</span>
+  <div class="step-title">What was in YOUR control?</div>
+  <div class="step-sub">Even in a storm, you did something right. Tap what is true.</div>
+  ${CONTROLLED.map(t=>`<button class="choice" onclick="ctTap(this,'${t.replace(/'/g,"\\'")}')"><span class="ce">⭐</span>${esc(t)}</button>`).join('')}
+  <button class="btn go" onclick="finishReflect()">Finish ✅</button></div>`;};
+function ctTap(el,t){el.classList.toggle('on');const i=rf.controlled.indexOf(t);if(i>=0)rf.controlled.splice(i,1);else rf.controlled.push(t);}
+function finishReflect(){flow.reflect=rf;finishFlow();}
 function burst(){const cols=['#ff7ec9','#a64fc9','#ffc23f','#3fd6a8','#5b8ff5','#ff8a3f'];const host=$('cb');if(!host)return;
   for(let i=0;i<40;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'%';c.style.background=cols[i%cols.length];
     c.style.animation=`fall ${1.6+Math.random()*1.6}s ${Math.random()*.5}s linear forwards`;if(i%3===0)c.style.borderRadius='50%';host.appendChild(c);}}
@@ -717,7 +969,7 @@ function burst(){const cols=['#ff7ec9','#a64fc9','#ffc23f','#3fd6a8','#5b8ff5','
 renderers.wins=()=>{const pct=Math.round(state.monsterShrink/6*100);
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY WINS 🏆</span><div class="step-title">Look how you\u2019re growing!</div>
   <div class="shrinkbox" style="text-align:center"><div class="duo">${pip('',82)}${tangle('',monsterSize(),monsterMad())}</div>
-    <div style="font-weight:800;color:var(--grape-deep);margin-top:8px">${state.monsterShrink>=6?'Tangle is calm and tiny now! 🌟':'You + Pip are helping Tangle calm down'}</div>
+    <div style="font-weight:800;color:var(--grape-deep);margin-top:8px">${state.monsterShrink>=6?'Tangle is calm and tiny now! 🌟':'You + Bloom are helping Tangle calm down'}</div>
     <div class="bar"><i style="width:${pct}%"></i></div>
     <div style="font-size:12px;font-weight:800;color:var(--ink-soft);margin-top:6px">Every win helps the big feeling get smaller</div></div>
   <div class="card" style="display:flex;align-items:center;gap:14px"><div style="font-size:36px">⭐</div>
@@ -725,15 +977,15 @@ renderers.wins=()=>{const pct=Math.round(state.monsterShrink/6*100);
     <div style="font-weight:800;color:var(--ink-soft);font-size:13px">points to spend · ${state.totalPoints} earned all-time</div></div></div>
   <div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">My moments</div>
   ${state.log.length?state.log.slice(0,25).map(l=>{const sub=(l.tool?'Used: '+esc(l.tool)+' · ':'')+(l.rateBefore!=null&&l.rateAfter!=null?'Feeling '+l.rateBefore+' → '+l.rateAfter:'logged');
-    const em={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎'}[l.section]||'⭐';
+    const em={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎',comment:'💬',reflect:'🌈',sunshine:'☀️'}[l.section]||'⭐';
     return `<div class="logitem"><span class="lemoji">${em}</span><div style="flex:1"><div class="lt">${esc(l.title)}</div><div class="ls">${sub}</div></div><span class="badge">+${l.pts}⭐</span></div>`;}).join('')
     :`<div class="card"><p>No moments yet. Try a door on the home screen — every try is a win! 💜</p></div>`}
   <button class="btn" onclick="go('home')">Back home</button></div>`;};
 
 /* ---- CLOSET ---- */
 const ITEMS=[{id:'hat',e:'🎩',n:'Top Hat',c:5},{id:'crown',e:'👑',n:'Crown',c:10},{id:'bow',e:'🎀',n:'Big Bow',c:8},{id:'shades',e:'🕶️',n:'Cool Shades',c:6},{id:'star',e:'⭐',n:'Star Pal',c:7},{id:'rainbow',e:'🌈',n:'Rainbow',c:12}];
-renderers.closet=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PIP\u2019S CLOSET 🎩</span>
-  <div class="step-title">Dress up Pip</div><div class="step-sub">Buy an item, then tap it to put it on. Tap again to take it off!</div>
+renderers.closet=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BLOOM\u2019S CLOSET 🎩</span>
+  <div class="step-title">Dress up Bloom</div><div class="step-sub">Buy an item, then tap it to put it on. Tap again to take it off!</div>
   <div class="shrinkbox" style="text-align:center">${pip('',124)}</div>
   ${ITEMS.map(it=>{const owned=!!state.owned[it.id],worn=state.wearing===it.id,can=state.points>=it.c;
     const btn=worn?`<button class="tag on" onclick="closetTap('${it.id}')">Wearing ✓</button>`:owned?`<button class="tag use" onclick="closetTap('${it.id}')">Wear</button>`:`<button class="tag buy" onclick="closetTap('${it.id}')">⭐ ${it.c}</button>`;
@@ -764,7 +1016,7 @@ renderers.gate=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span cla
   <button class="btn" onclick="checkPin()">Unlock</button><div id="pm" class="skipnote"></div></div>`;
   $('pin').focus();$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});};
 function checkPin(){if($('pin').value===(state.pin||'1234'))go('parentHome');else $('pm').textContent='That PIN is not right.';}
-renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it coming',helpNow:'I need help now',brave:'Be brave',people:'People detective',thought:'Thought detective'};
+renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it coming',helpNow:'I need help now',brave:'Be brave',people:'People detective',thought:'Thought detective',comment:'Comment or judgment',reflect:'After the storm',sunshine:'Sunshine'};
   const counts={};Object.keys(sec).forEach(k=>counts[k]=0);state.log.forEach(e=>{if(counts[e.section]!=null)counts[e.section]++;});const maxc=Math.max(1,...Object.values(counts));
   const ba=state.log.filter(e=>typeof e.rateBefore==='number'&&typeof e.rateAfter==='number');const drop=ba.length?(ba.reduce((s,e)=>s+(e.rateBefore-e.rateAfter),0)/ba.length):null;
   const sk={};state.log.forEach(e=>{if(e.tool){const n=e.tool;sk[n]=(sk[n]||0)+1;}});const top=Object.entries(sk).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -776,20 +1028,35 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
     <div class="statcard"><div class="statnum">${currentStreak()}</div><div class="statlbl">DAY STREAK</div></div></div>
   <div class="card"><h3>How it\u2019s being used</h3>
     ${Object.keys(sec).map(k=>`<div class="barrow"><span style="width:120px;font-size:12.5px">${sec[k]}</span><span class="mini"><i style="width:${counts[k]/maxc*100}%"></i></span><span>${counts[k]}</span></div>`).join('')}</div>
+  <div class="card"><h3>Mood check-ins</h3>
+    ${(state.moods||[]).length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${state.moods.slice(0,14).map(m=>`<div style="text-align:center"><div style="font-size:22px">${m.e}</div><div style="font-size:9px;font-weight:800;color:var(--ink-soft)">${m.day.slice(5)}</div></div>`).join('')}</div>
+      <p style="margin-top:8px;font-size:13px">Most common lately: <b>${(function(){const c={};state.moods.slice(0,14).forEach(m=>c[m.t]=(c[m.t]||0)+1);const s=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];return s?s[0]:'—';})()}</b></p>`
+      :'<p style="color:var(--ink-soft)">No check-ins yet.</p>'}</div>
+  ${(function(){const rs=state.log.filter(e=>e.reflect);if(!rs.length)return '';
+    const tally=(key)=>{const c={};rs.forEach(e=>{(e.reflect.picks[key]||[]).forEach(v=>c[v]=(c[v]||0)+1);});return Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,4);};
+    const tri=tally('why'),pl=tally('where'),did=tally('did');
+    const row=(t,arr)=>arr.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:14px">${t}</div>${arr.map(([n,c])=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(n)}</span><b>${c}</b></div>`).join('')}`:'';
+    return `<div class="card"><h3>After-the-storm patterns</h3><p style="font-size:12.5px;color:var(--ink-soft)">From ${rs.length} reflection${rs.length>1?'s':''}.</p>
+      ${row('Common triggers',tri)}${row('Where it happens',pl)}${row('What they did',did)}</div>`;})()}
   <div class="card"><h3>Is it helping?</h3>
     <p>${drop==null?'<span style="color:var(--ink-soft)">No before/after ratings yet.</span>':'Average feeling change: <b>'+drop.toFixed(1)+' points lower</b> after using a tool ('+ba.length+' rated moments).'}</p>
-    ${top.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:14px">Most-used tools</div>${top.map(([n,c])=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(n)}</span><b>${c}</b></div>`).join('')}`:''}</div>
+    ${top.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:14px">Most-used tools</div>${top.map(([n,c])=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(n)}</span><b>${c}</b></div>`).join('')}`:''}
+    ${(function(){const m={};state.log.forEach(e=>{if(e.tool&&typeof e.rateBefore==='number'&&typeof e.rateAfter==='number'){(m[e.tool]=m[e.tool]||[]).push(e.rateBefore-e.rateAfter);}});
+      const rank=Object.entries(m).map(([n,a])=>[n,a.reduce((x,y)=>x+y,0)/a.length,a.length]).filter(r=>r[2]>=1).sort((a,b)=>b[1]-a[1]).slice(0,4);
+      return rank.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:10px;font-size:14px">Which tools calm them most</div>${rank.map(r=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(r[0])}</span><b>−${r[1].toFixed(1)}</b></div>`).join('')}`:'';})()}</div>
   <div class="card"><h3>Recent moments</h3>${state.log.length?state.log.slice(0,15).map(e=>{const r=(e.rateBefore!=null&&e.rateAfter!=null)?` · ${e.rateBefore}→${e.rateAfter}`:'';const g=e.gotGrownUp?' · asked for a grown-up':'';
     return `<div style="font-size:13px;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,.12)"><b>${esc(sec[e.section]||e.section)}</b> <span style="color:var(--ink-soft)">${fmt(e.ts)}</span>${r}${g}</div>`;}).join(''):'<p>Nothing logged yet.</p>'}</div>
   <div class="card"><h3>Settings</h3>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><b>Faith moments</b><br><span class="skipnote" style="text-align:left">A gentle line in Sunshine + prayer tool. Now ${state.faith?'on':'off'}.</span></div>
-      <button class="tag ${state.faith?'use':'buy'}" onclick="state.faith=!state.faith;save();go('parentHome')">${state.faith?'Turn off':'Turn on'}</button></div>
+    <div><b>Faith level</b><br><span class="skipnote" style="text-align:left">Shapes the "You Are Loved" moments and the prayer tool. Your child sees nothing about this setting.</span></div>
+    ${[['none','None','Fully secular. Warm encouragement only.'],['light','Light','The Golden Rule and kindness. No scripture.'],['medium','Medium','Short verses with the message.'],['high','High','Full faith moments, with a prayer to say.']]
+      .map(l=>`<button class="choice ${state.faithLevel===l[0]?'on':''}" style="margin-top:8px" onclick="setFaith('${l[0]}')"><span class="ce">${state.faithLevel===l[0]?'✅':'⬜'}</span><span><b>${l[1]}</b><br><span style="font-weight:600;font-size:12.5px;opacity:.85">${l[2]}</span></span></button>`).join('')}
     <div style="height:12px"></div>
     <button class="btn ghost" onclick="renameChild()">Edit child\u2019s name (${esc(state.name)||'not set'})</button>
     <button class="btn ghost" onclick="changePin()">Change PIN</button>
     <button class="btn ghost" onclick="go('about')">About / Parent Info</button>
     <button class="btn ghost" style="color:#d8334a" onclick="wipe()">Reset all data on this device</button></div>
   <button class="btn" onclick="go('home')">Back to ${esc(state.name)||'kid'}\u2019s app</button></div>`;};
+function setFaith(v){state.faithLevel=v;state.faith=(v!=='none');save();go('parentHome');}
 function renameChild(){const v=prompt("Child\u2019s name:",state.name||'');if(v!=null){state.name=v.trim().slice(0,18);save();go('parentHome');}}
 function changePin(){const v=prompt('Set a new 4-digit PIN:',state.pin||'1234');if(v!=null){const c=v.replace(/\D/g,'').slice(0,4);if(c.length===4){state.pin=c;save();alert('PIN updated.');}else alert('PIN must be 4 digits.');}}
 function wipe(){if(confirm('Erase all points, rewards, and history on this device? This cannot be undone.')){state=freshState();save();setTheme();go('disclaimer');}}
@@ -805,8 +1072,14 @@ renderers.distract=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span
   <button class="choice" onclick="go('factT')"><span class="ce">🤓</span>Tell me a fact</button>
   <button class="choice" onclick="go('bubblePop')"><span class="ce">🫧</span>Pop the bubbles</button>
   <button class="choice" onclick="go('mathPick')"><span class="ce">🔢</span>Math bubble pop</button>
+  <button class="choice" onclick="go('ideaT')"><span class="ce">💡</span>Give me something to do</button>
   <button class="btn go" onclick="afterTool()">Done — I feel better ✅</button></div>`;};
 
+renderers.ideaT=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">TRY THIS 💡</span>
+  <div class="card" style="margin-top:14px"><p style="font-size:18px;font-weight:700;line-height:1.45">${esc(pickRandom(DISTRACT_IDEAS))}</p></div>
+  <div class="duo" style="margin:8px auto">${pip('',92)}</div>
+  <button class="btn" onclick="renderers.ideaT()">Another! →</button>
+  <button class="btn ghost" onclick="goBack()">← Back to distractions</button></div>`;};
 renderers.factT=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">DID YOU KNOW? 🤓</span>
   <div class="card" style="margin-top:14px"><p style="font-size:18px;font-weight:700;line-height:1.45">${esc(pickRandom(FACTS))}</p></div>
   <button class="btn" onclick="renderers.factT()">Another! →</button>
@@ -882,7 +1155,9 @@ function endMathPop(){stopGames();
    <button class="btn ghost" onclick="go('mathPick')">Pick a different kind →</button>
    <button class="btn ghost" onclick="go('distract')">← Back to distractions</button></div>`;}
 
-function stopGames(){if(bpInt){clearInterval(bpInt);bpInt=null;}if(bpSpawn){clearInterval(bpSpawn);bpSpawn=null;}if(mInt){clearInterval(mInt);mInt=null;}if(mSpawn){clearInterval(mSpawn);mSpawn=null;}}
+function stopTimers(){breatheTimers.forEach(t=>{clearInterval(t);clearTimeout(t);});breatheTimers=[];}
+let breatheTimers=[];
+function stopGames(){stopTimers();if(bpInt){clearInterval(bpInt);bpInt=null;}if(bpSpawn){clearInterval(bpSpawn);bpSpawn=null;}if(mInt){clearInterval(mInt);mInt=null;}if(mSpawn){clearInterval(mSpawn);mSpawn=null;}}
 
 /* ---- boot ---- */
 (async function(){Store.init();const saved=await Store.load();state=migrate(saved);setTheme();
