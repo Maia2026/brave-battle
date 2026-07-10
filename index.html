@@ -25,6 +25,12 @@
 [data-theme="bubblegum"]{ --bg1:#ffe9f8; --bg2:#efe6ff; --grape:#ff5b9e; --grape-deep:#b43378; --orchid:#c861d9; --lilac:#ffd9ee; --shadow:rgba(180,51,120,.16);}
 [data-theme="forest"]{ --bg1:#ecf7e6; --bg2:#f6f7df; --grape:#5a9e3e; --grape-deep:#3a6f2a; --orchid:#8bc34a; --lilac:#ddeccb; --ink:#33452f; --ink-soft:#6f8767; --shadow:rgba(58,111,42,.16);}
 [data-theme="night"]{ --bg1:#2b2c4a; --bg2:#3a3d6b; --card:#34355a; --ink:#f1ecff; --ink-soft:#b6b0d8; --grape:#b07cff; --grape-deep:#d7c4ff; --orchid:#8fb0ff; --lilac:#4a4a7a; --shadow:rgba(0,0,0,.35);}
+[data-theme="cotton"]{ --bg1:#fdeafb; --bg2:#eafbff; --grape:#e06fc4; --grape-deep:#a83e8c; --orchid:#7ec8e0; --lilac:#f7dcf1; --shadow:rgba(168,62,140,.15);}
+[data-theme="lemon"]{ --bg1:#fffbe0; --bg2:#fff0e6; --grape:#f0a500; --grape-deep:#b06f00; --orchid:#ffca3a; --lilac:#fbeeb8; --ink:#4a3f22; --ink-soft:#8a7a50; --shadow:rgba(176,111,0,.14);}
+[data-theme="mint"]{ --bg1:#e6fff2; --bg2:#eafff7; --grape:#20b48a; --grape-deep:#127a5c; --orchid:#5ed6b0; --lilac:#c8f0e2; --ink:#22463c; --ink-soft:#5d8b7d; --shadow:rgba(18,122,92,.15);}
+[data-theme="lavender"]{ --bg1:#f1eaff; --bg2:#faf0ff; --grape:#9d6ee0; --grape-deep:#6f42b0; --orchid:#c08fe8; --lilac:#e6d9fb; --shadow:rgba(111,66,176,.15);}
+[data-theme="peach"]{ --bg1:#ffeee4; --bg2:#ffe8ee; --grape:#ff8a5b; --grape-deep:#d1592b; --orchid:#ffb08b; --lilac:#ffdcc8; --shadow:rgba(209,89,43,.15);}
+[data-theme="berry"]{ --bg1:#ffe6ee; --bg2:#f3e6ff; --grape:#d63384; --grape-deep:#9c2062; --orchid:#c861d9; --lilac:#f7d0e4; --shadow:rgba(156,32,98,.15);}
 
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
@@ -242,15 +248,16 @@ const Store={
 let state=null, flow={}, cachedGreeting=null;
 const MONSTER_SIZES=[140,126,112,100,88,76,64];
 function freshState(){return{
-  name:'', onboarded:false, acknowledged:false, ackVersion:0, points:0, totalPoints:0, monsterShrink:0,
+  onboarded:false, acknowledged:false, ackVersion:0, points:0, totalPoints:0, monsterShrink:0,
   theme:'grape', wearing:null, owned:{}, unlockedThemes:['grape'],
-  faith:true, faithLevel:'light', pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[],
+  faith:true, faithLevel:'light', pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[], rewards:[], pendingClaims:[], earnedRewards:[],
   usedDays:{}, streakCount:0, lastUseDay:''
 };}
 const FOOT_TEXT='© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.';
 const ACK_VERSION=2; // bump to re-show the welcome/disclosures to everyone after legal changes
 function ackOK(){return state.acknowledged && state.ackVersion===ACK_VERSION;}
 function migrate(s){if(!s)return freshState();const b=freshState();
+  if('name' in s)delete s.name; // COPPA: no personal identifier stored
   if(s.faithLevel==null)s.faithLevel=(s.faith===false)?'none':'light';
   for(const k in b)if(s[k]==null)s[k]=b[k];s.faith=(s.faithLevel!=='none');return s;}
 function save(){Store.save(state);}
@@ -275,6 +282,14 @@ function accessorySVG(id){switch(id){
   case 'shades':return `<g><rect x="68" y="84" width="26" height="18" rx="6" fill="#2a1640"/><rect x="106" y="84" width="26" height="18" rx="6" fill="#2a1640"/><rect x="94" y="90" width="12" height="4" fill="#2a1640"/></g>`;
   case 'star':return `<g><path d="M150 44 l4 10 11 1 -8 8 2 11 -9 -6 -9 6 2 -11 -8 -8 11 -1 Z" fill="#ffc23f" stroke="#e8a317" stroke-width="1.5"/></g>`;
   case 'rainbow':return `<g fill="none" stroke-width="5" stroke-linecap="round" opacity="0.9"><path d="M40 170 Q100 122 160 170" stroke="#ff5b6e"/><path d="M48 174 Q100 134 152 174" stroke="#ffc23f"/><path d="M56 178 Q100 146 144 178" stroke="#3fd6a8"/></g>`;
+  case 'party':return `<g><path d="M100 8 L84 50 L116 50 Z" fill="#ff5b9e"/><path d="M100 8 L92 30 M100 20 L108 40" stroke="#fff" stroke-width="3"/><circle cx="100" cy="8" r="5" fill="#ffc23f"/><circle cx="90" cy="44" r="3" fill="#5b8ff5"/><circle cx="108" cy="40" r="3" fill="#3fd6a8"/></g>`;
+  case 'flower':return `<g>${[66,82,100,118,134].map((x,i)=>`<g transform="translate(${x},${[46,38,34,38,46][i]})"><circle r="7" fill="${['#ff7ec9','#ffc23f','#ff5b6e','#b07cff','#3fd6a8'][i]}"/><circle r="2.5" fill="#fff"/></g>`).join('')}</g>`;
+  case 'cap':return `<g><path d="M68 54 Q100 22 132 54 Z" fill="#e0673a"/><path d="M64 54 Q100 44 100 54 Z" fill="#c8531f"/><ellipse cx="100" cy="30" rx="6" ry="4" fill="#ffc23f"/></g>`;
+  case 'headphones':return `<g fill="none"><path d="M62 96 Q62 44 100 44 Q138 44 138 96" stroke="#2a1640" stroke-width="7"/><rect x="54" y="90" width="16" height="26" rx="7" fill="#5b8ff5"/><rect x="130" y="90" width="16" height="26" rx="7" fill="#5b8ff5"/></g>`;
+  case 'wizard':return `<g><path d="M100 2 L74 54 L126 54 Z" fill="#5b3fb0"/><path d="M100 2 L74 54 L126 54 Z" fill="url(#wz)" opacity=".5"/><circle cx="96" cy="30" r="3" fill="#ffc23f"/><circle cx="106" cy="42" r="2.5" fill="#fff"/><path d="M100 14 l2 5 5 1 -4 4 1 5 -4 -3 -4 3 1 -5 -4 -4 5 -1 Z" fill="#ffc23f"/><defs><linearGradient id="wz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#5b3fb0" stop-opacity="0"/></linearGradient></defs></g>`;
+  case 'halo':return `<g><ellipse cx="100" cy="34" rx="30" ry="9" fill="none" stroke="#ffe27a" stroke-width="6"/><ellipse cx="100" cy="34" rx="30" ry="9" fill="none" stroke="#ffc23f" stroke-width="2"/></g>`;
+  case 'cowboy':return `<g><ellipse cx="100" cy="52" rx="46" ry="11" fill="#b5793f"/><path d="M74 52 Q76 20 100 20 Q124 20 126 52 Z" fill="#caa063"/><rect x="74" y="46" width="52" height="7" fill="#8a5a2a"/></g>`;
+  case 'earmuffs':return `<g><path d="M100 6 L60 26 L100 40 L140 26 Z" fill="#2a1640"/><rect x="88" y="38" width="24" height="16" rx="3" fill="#2a1640"/><path d="M112 44 h16 v10 h-4 v-6 h-12 Z" fill="#ffc23f"/></g>`;
   default:return '';}}
 function pipSVG(s){s=s||140;const worn=state&&state.wearing?state.wearing:null;
   return `<svg width="${s}" height="${s}" viewBox="0 0 200 200">
@@ -308,17 +323,21 @@ function monsterMad(){return Math.max(0,1-state.monsterShrink*0.16);}
 
 /* ---- content ---- */
 const TOOLS=[
-  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵','Do 10 wall push-ups 💪','Hop on one foot, then the other 🦩','Crab-walk across the room 🦀','Squeeze a pillow as hard as you can, then drop it 🛏️']},
-  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Hold something soft and notice how it feels 🧸','Press your palms together, then release 🙌','Rock slowly side to side 🎐','Put a hand on your heart and feel it slow down 💗']},
+  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵','Do 10 wall push-ups 💪','Hop on one foot, then the other 🦩','Crab-walk across the room 🦀','Squeeze a pillow as hard as you can, then drop it 🛏️','March in place like a wind-up toy 🥁','Do 10 big arm circles each way 🌪️','Pretend to jump rope for 20 jumps 🤾','Wiggle like a noodle, then freeze like a statue 🍜']},
+  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Hold something soft and notice how it feels 🧸','Press your palms together, then release 🙌','Rock slowly side to side 🎐','Put a hand on your heart and feel it slow down 💗','Give yourself a big cross-arm hug 🤗','Push your hands into your lap and hold, then relax 👐','Warm your hands by rubbing them together 🔥','Curl up small, then s-t-r-e-t-c-h out tall 🐢']},
   {id:'ground',e:'🖐️',name:'5-4-3-2-1 grounding',kind:'ground'},
+  {id:'senses',e:'🌡️',name:'Cool down my senses',kind:'senses'},
   {id:'squeeze',e:'✊',name:'Squeeze and let go',kind:'squeeze'},
-  {id:'craft',e:'🎨',name:'Craft or read',kind:'list',ideas:['Draw or color something just for fun 🎨','Read a few pages of your book 📖','Build or make a little craft ✂️','Find a cozy spot that is just yours 🛋️','Make up a story about Bloom 📚','Fold paper into something new 📄','Doodle shapes until the page is full ✏️']},
-  {id:'calmmind',e:'🌈',name:'Calm my mind',kind:'list',ideas:['Count slowly backwards from 20 🔢','Name every color you can find in the room 🌈','Picture your calm happy place 🏖️','Name an animal for every letter A-E 🦓','Think of 3 things that made you laugh 😄','Say the alphabet backwards, slowly 🔤','Picture the feeling floating away like a balloon 🎈']},
+  {id:'butterfly',e:'🦋',name:'Butterfly hug',kind:'butterfly'},
+  {id:'craft',e:'🎨',name:'Craft or read',kind:'list',ideas:['Draw or color something just for fun 🎨','Read a few pages of your book 📖','Build or make a little craft ✂️','Find a cozy spot that is just yours 🛋️','Make up a story about Bloom 📚','Fold paper into something new 📄','Doodle shapes until the page is full ✏️','Build the tallest tower you can 🧱','Make a tiny gift for someone 🎁','Color a picture using only your favorite color 🖍️','Draw your happy place 🏝️']},
+  {id:'calmmind',e:'🌈',name:'Calm my mind',kind:'list',ideas:['Count slowly backwards from 20 🔢','Name every color you can find in the room 🌈','Picture your calm happy place 🏖️','Name an animal for every letter A-E 🦓','Think of 3 things that made you laugh 😄','Say the alphabet backwards, slowly 🔤','Picture the feeling floating away like a balloon 🎈','Imagine putting the worry in a box and closing the lid 📦','Count how many things in the room are round ⭕','Plan the best pizza you can imagine 🍕','Picture a calm color filling you up from your toes 🎨','Name 3 people who care about you 💗']},
   {id:'balloon',e:'🎈',name:'Balloon breath',kind:'breath'},
-  {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️','Run cool water over your wrists 🚰','Hold an ice cube until it starts to melt 🧊']},
+  {id:'figure8',e:'➰',name:'Figure-8 breathing',kind:'fig8'},
+  {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️','Run cool water over your wrists 🚰','Hold an ice cube until it starts to melt 🧊','Press a cool cloth to the back of your neck 🧻','Breathe out slowly like you are fogging a window 🌬️']},
   {id:'mantra',e:'💜',name:'Say positive mantras',kind:'mantra'},
-  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️','Growl it into a pillow 🦁','Make an angry drawing, then turn it into something silly 🎨']},
+  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️','Growl it into a pillow 🦁','Make an angry drawing, then turn it into something silly 🎨','Stomp it into the ground, one stomp per word 👣','Blow the feeling into a balloon (pretend) and let it go 🎈','Tell it to leave, out loud, like a boss 🚪','Draw the feeling as a weather picture ⛈️']},
   {id:'tell',e:'💬',name:'Tell Bloom about it',kind:'tell'},
+  {id:'kind',e:'🌟',name:'Do a kind thing',kind:'list',ideas:['Give someone a real compliment 💬','Draw a little thank-you note 💌','Help with one small chore without being asked 🧹','Check on someone who seems sad 🫂','Say something kind to YOURSELF in the mirror 🪞','Share something with someone 🤝','Give someone a high five or a hug 🖐️','Do one thing that makes a grown-up smile 😊']},
   {id:'faith',e:'🙏',name:'Prayer or verse',kind:'faith'},
   {id:'distract',e:'🎲',name:'Distract me',kind:'distract'},
 ];
@@ -431,6 +450,7 @@ const AFTER_Q=[
   {key:'why',tag:'WHAT SET IT OFF?',q:'What started the big feeling?',chips:['Someone said no 🚫','Felt left out 😕','Felt picked on 😠','Felt teased 🙄','Something felt unfair ⚖️','Didn\u2019t get my way 😤','Something scared me 😨','I was tired or hungry 😴','I made a mistake 😬','I don\u2019t know 🤷']},
 ];
 const GRAT_CHIPS=['What made you smile today?','Who was nice to you today?','What was the best part of today?','I had fun when...','I felt happy when...','I liked it when...','Today I got to...','I\u2019m glad about...','Today I noticed...','A good thing today was...','Someone I love is...'];
+const REWARD_IDEAS=[['15 min extra screen time 📱',20],['Pick what\u2019s for dinner 🍕',35],['Stay up 15 min late 🌙',40],['Choose a family movie 🎬',45],['A special treat 🍦',30],['One-on-one time with a grown-up 💛',80],['A small toy or trinket 🧸',100],['Pick the weekend activity 🎉',120]];
 const CHECKINS=[{e:'😄',t:'Great'},{e:'🙂',t:'Okay'},{e:'😐',t:'Meh'},{e:'😟',t:'Worried'},{e:'😠',t:'Mad'},{e:'😢',t:'Sad'}];
 const CHEERS=['You did that. Not me — you.','I am so proud of you right now.','That was real work, and you finished it.','Every time you practice, it gets a little easier.','You are braver than you were yesterday.','Look at you, using your tools!','That is exactly what strong looks like.','You showed up, even when it was hard.','I knew you could. And you did.','Big feelings, bigger you. 💜'];
 const ENCOURAGE=['Whatever today is, we can take it one moment at a time.','You do not have to be perfect here. Just here.','Even coming back today counts.','Some days are heavy. You are not alone in it.','You are allowed to feel this AND be okay.','Nothing you feel today makes you any less loved.'];
@@ -493,7 +513,7 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
   <div class="card"><h3>Your Data</h3>
     <p>This is a <b>demo (tester) version</b> of Brave Battle, and it is built to keep your child's information on the device.</p>
     <p style="margin-top:8px">• <b>No server, by design — for this demo.</b> This tester version does not send anything anywhere. There is no account, no login, and no Brave Kids United Inc server collecting information — so nothing your child does in this demo travels back to us. We never receive it, and we can't see it.<br>
-    • <b>Saved on this device only.</b> To make the app work, it stores a few things right on the device: a nickname your child picks, their points and rewards, and anything they type in the app (like a gratitude note or a worry they check). This stays on the device and is visible only in the Grown-Ups area on that same device.<br>
+    • <b>Saved on this device only.</b> To make the app work, it stores a few things right on the device: their points and rewards, and anything they type in the app (like a gratitude note or a worry they check). This stays on the device and is visible only in the Grown-Ups area on that same device.<br>
     • <b>No personal info requested.</b> No emails, no ages, no contact information.<br>
     • <b>You're in control.</b> To erase everything, tap "Reset all data" in the Grown-Ups section, or clear this app's data from the device.</p>
     <p style="margin-top:8px">Because this demo collects nothing on our end, there is no data about your family for us to store, share, or delete.</p>
@@ -512,15 +532,10 @@ renderers.onboard=()=>{screen.innerHTML=`<div class="pad fade" style="padding-to
   <span class="step-tag">WELCOME 👋</span>
   <div class="duo" style="margin-top:12px">${pip('',172)}</div>
   <div class="step-title" style="font-size:32px;margin-top:4px">Hi! I\u2019m Bloom.</div>
-  <div class="step-sub" style="max-width:300px;margin:8px auto 0">I\u2019m your buddy for big feelings — big mad OR big worry. We\u2019ll take things one small step at a time, together.</div>
-  <div class="card" style="margin-top:20px">
-    <h3 style="text-align:center">What should I call you?</h3>
-    <input id="nm" type="text" placeholder="Type your name" maxlength="18">
-    <button class="btn" onclick="doStart()">Nice to meet you! ›</button>
-  </div>
-  <div class="skipnote">Saves only on this device.</div></div>`;
-  $('nm').focus();$('nm').addEventListener('keydown',e=>{if(e.key==='Enter')doStart();});};
-function doStart(){state.name=($('nm').value||'').trim().slice(0,18);state.onboarded=true;save();go('meetTangle');}
+  <div class="step-sub" style="max-width:310px;margin:8px auto 0">I\u2019m your buddy for big feelings — big mad OR big worry. We\u2019ll take things one small step at a time, together.</div>
+  <div class="card" style="margin-top:20px"><p style="font-weight:700">Ready when you are. Let\u2019s go meet the big feeling. 💜</p></div>
+  <button class="btn" onclick="doStart()">Let\u2019s go! ›</button></div>`;};
+function doStart(){state.onboarded=true;save();go('meetTangle');}
 renderers.meetTangle=()=>{screen.innerHTML=`<div class="pad fade" style="padding-top:6vh;text-align:center">
   <span class="step-tag">MEET TANGLE 🧡</span>
   <div class="duo" style="margin-top:14px">${tangle('',150,1)}</div>
@@ -559,7 +574,7 @@ renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cache
   screen.innerHTML=`<div class="toprow"><div class="streakpill" title="day streak">🔥 ${streak}</div><div class="spacer"></div><div class="pointchip">⭐ ${state.points}</div></div>
   <div class="pad fade"><div style="text-align:center"><div class="hero-name">Brave Battle</div>
     <div style="font-size:11.5px;font-weight:800;color:var(--ink-soft);letter-spacing:.06em;margin-top:-2px">BATTLE BIG FEELINGS, TOGETHER</div>
-    <div class="hello">Hi, ${esc(state.name)||'friend'}! 👋</div></div>
+    <div class="hello">Hi, friend! 👋</div></div>
     <div class="duo" style="margin-top:4px">${pip('',120)}</div>
     <div class="speech">${cachedGreeting}</div>
     <div class="statrow">
@@ -579,6 +594,7 @@ renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cache
       <button class="minicard" onclick="go('wins')"><div class="mi">🏆</div><div class="ml">My Wins</div></button>
       <button class="minicard ${state.wearing?'wearing':''}" onclick="go('closet')"><div class="mi">🎩</div><div class="ml">Closet</div></button>
       <button class="minicard" onclick="go('colors')"><div class="mi">🎨</div><div class="ml">Colors</div></button>
+      <button class="minicard" onclick="go('rewards')"><div class="mi">🎁</div><div class="ml">Rewards${(state.earnedRewards&&0)||''}</div></button>
       <button class="minicard" onclick="go('gate')"><div class="mi">🔒</div><div class="ml">Grown-Ups</div></button></div>
     <button class="btn ghost" style="margin-top:10px" onclick="go('about')">About / Parent Info</button></div>`;};
 
@@ -605,11 +621,17 @@ renderers.feelComing=()=>{flow={section:'feelComing'};screen.innerHTML=`${topbar
   <div class="step-sub">You opened the app early — that\u2019s a big win already! 🌟</div>
   ${WARN.map((w,i)=>`<button class="choice" onclick="pickWarn(${i})"><span class="ce">${w.e}</span>${esc(w.t)}</button>`).join('')}</div>`;};
 function pickWarn(i){flow.warn=WARN[i].t;go('rate',{when:'now'});}
-renderers.earlyPick=()=>{const sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'👀',t:'Name 5 things I can see',id:'do'},{e:'🛋️',t:'Go to a calm spot',id:'do'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'do'}];
+renderers.earlyPick=()=>{const sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'🖐️',t:'Do 5-4-3-2-1 grounding',id:'ground'},{e:'🦋',t:'Give myself a butterfly hug',id:'butterfly'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'squeeze'}];
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PICK ONE QUICK THING</span><div class="step-title">Catch it before it grows</div>
-  ${sk.map((s,i)=>`<button class="choice" onclick="earlyDo(${i})"><span class="ce">${s.e}</span>${esc(s.t)}</button>`).join('')}</div>`;
+  ${sk.map((s,i)=>`<button class="choice" onclick="earlyDo(${i})"><span class="ce">${s.e}</span>${esc(s.t)}</button>`).join('')}
+  <button class="btn ghost" onclick="go('toolList')">See all my tools 🧰</button></div>`;
   window._early=sk;};
-function earlyDo(i){const s=window._early[i];flow.tool=s.t;if(s.id==='balloon')go('breathe',{next:'afterEarly'});else simpleDo(s.e,s.t,'afterEarly');}
+function earlyDo(i){const s=window._early[i];flow.tool=s.t;
+  if(s.id==='balloon')go('breathe',{next:'afterEarly'});
+  else if(s.id==='ground')go('ground',{n:0});
+  else if(s.id==='butterfly')go('butterfly');
+  else if(s.id==='squeeze')go('squeeze',{n:0});
+  else simpleDo(s.e,s.t,'afterEarly');}
 function afterEarly(){go('rate',{when:'after'});}
 function simpleDo(e,label,nextFn){screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center">
   <span class="step-tag">TRY IT</span><div style="font-size:48px;margin-top:14px">${e}</div><div class="step-title">${esc(label)}</div>
@@ -636,9 +658,44 @@ function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
   else if(t.kind==='faith')go('faithTool');
   else if(t.kind==='distract')go('distract');
   else if(t.kind==='ground')go('ground',{n:0});
+  else if(t.kind==='senses')go('senses',{n:0});
+  else if(t.kind==='butterfly')go('butterfly');
+  else if(t.kind==='fig8')go('fig8');
   else if(t.kind==='squeeze')go('squeeze',{n:0});
   else if(t.kind==='tell')go('tellWrite');
   else go('doTool',{id});}
+
+
+/* ---- Cool down my senses (temperature/grounding, guided) ---- */
+const SENSE_STEPS=[{e:'🧊',t:'Something cool',s:'Find something cool to touch — a wall, a window, a cold drink. Hold it for a few breaths.'},{e:'👂',t:'One quiet sound',s:'Close your eyes and find the quietest sound you can hear. Just listen to it.'},{e:'🫁',t:'One long breath',s:'Breathe in for 4... and out for 6, long and slow, like you are cooling soup.'},{e:'🦶',t:'Feel the floor',s:'Press your feet down and notice the ground holding you up. You are steady.'}];
+renderers.senses=(d)=>{const i=d.n||0,s=SENSE_STEPS[i];
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">COOL DOWN MY SENSES 🌡️</span>
+  <div style="font-size:52px;margin-top:10px">${s.e}</div><div class="step-title">${s.t}</div>
+  <div class="card"><p style="font-size:16px">${s.s}</p></div>
+  <div class="duo" style="margin:8px auto">${pip('',92)}</div>
+  <button class="btn go" onclick="${i<SENSE_STEPS.length-1?`go('senses',{n:${i+1}})`:'afterTool()'}">${i<SENSE_STEPS.length-1?'Done — next ›':'I feel cooler ✅'}</button>
+  <div class="skipnote">Step ${i+1} of ${SENSE_STEPS.length}</div></div>`;};
+
+/* ---- Butterfly hug (bilateral tapping, guided) ---- */
+renderers.butterfly=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">BUTTERFLY HUG 🦋</span>
+  <div class="step-title">Give yourself a hug</div>
+  <div class="card" style="text-align:left"><p>Cross your arms over your chest so your hands rest on the tops of your shoulders — like butterfly wings. 🦋</p>
+    <p style="margin-top:8px">Now tap gently, one hand, then the other... left... right... left... right. Slow and steady.</p></div>
+  <div style="font-size:60px;margin:14px" id="bfly">🫸🫷</div>
+  <div style="font-weight:800;color:var(--grape-deep)" id="bcount">Tap along 10 times</div>
+  <button class="btn go" onclick="afterTool()">I feel calmer 🦋</button></div>`;
+  let n=0;const el=$('bfly'),c=$('bcount');
+  breatheTimers.push(setInterval(()=>{n++;if(!$('bfly'))return;el.textContent=(n%2)?'🫷 🫸':'🫸 🫷';if($('bcount'))c.textContent=n>=10?'Beautiful. Keep going as long as you like. 💜':`${10-n} more...`;},700));};
+
+/* ---- Figure-8 breathing (trace + breathe, guided) ---- */
+renderers.fig8=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">FIGURE-8 BREATHING ➰</span>
+  <div class="step-title">Trace and breathe</div><div class="step-sub">Trace the loop with your finger. Breathe in on one loop, out on the other.</div>
+  <svg viewBox="0 0 200 120" style="width:250px;margin:10px auto"><path d="M100 60 C100 20 40 20 40 60 C40 100 100 100 100 60 C100 20 160 20 160 60 C160 100 100 100 100 60 Z" fill="none" stroke="var(--lilac)" stroke-width="14" stroke-linecap="round"/>
+    <circle r="9" fill="var(--grape)"><animateMotion dur="8s" repeatCount="indefinite" path="M100 60 C100 20 40 20 40 60 C40 100 100 100 100 60 C100 20 160 20 160 60 C160 100 100 100 100 60 Z"/></circle></svg>
+  <div class="breathe-word" id="f8">Breathe in 🌬️</div>
+  <button class="btn go" onclick="afterTool()">I feel calmer ✅</button></div>`;
+  let inn=true;const el=$('f8');
+  breatheTimers.push(setInterval(()=>{inn=!inn;if($('f8')){el.textContent=inn?'Breathe in 🌬️':'Breathe out 😮‍💨';el.style.color=inn?'var(--blue)':'var(--tangerine)';}},4000));};
 
 /* ---- 5-4-3-2-1 grounding (guided) ---- */
 const GROUND_STEPS=[{n:5,e:'👀',s:'things you can SEE',ph:'I see...'},{n:4,e:'✋',s:'things you can TOUCH',ph:'I can feel...'},{n:3,e:'👂',s:'things you can HEAR',ph:'I hear...'},{n:2,e:'👃',s:'things you can SMELL',ph:'I smell...'},{n:1,e:'👅',s:'thing you can TASTE',ph:'I taste...'}];
@@ -756,11 +813,74 @@ function braveDo(){const steps=flow.ladder||['Talk about it with someone I trust
 
 /* ---- 4) BE A DETECTIVE (hub: People Detective + Thought Detective) ---- */
 renderers.detectiveHub=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE A DETECTIVE 🔍</span>
-  <div class="step-title">Three kinds of detective work</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
+  <div class="step-title">Detective work — about others AND me</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
   <div class="card"><p>Our brain makes fast <b>guesses</b> — about other people, and about our own worried or mad thoughts. A good detective checks if they\u2019re really true.</p></div>
   <button class="door people" onclick="go('peopleStart')"><div class="emoji">🧩</div><div><div class="dt">People Detective</div><div class="ds">Mean? joke? accident? Read the clues</div></div></button>
   <button class="door before" onclick="go('thoughtStart')"><div class="emoji">🔎</div><div><div class="dt">Thought Detective</div><div class="ds">5 questions to check a tricky thought</div></div></button>
-  <button class="door gratitude" onclick="go('commentStart')"><div class="emoji">💬</div><div><div class="dt">Comment or Judgment?</div><div class="ds">Was it just noticing, or a put-down?</div></div></button></div>`;};
+  <button class="door gratitude" onclick="go('commentStart')"><div class="emoji">💬</div><div><div class="dt">Comment or Judgment?</div><div class="ds">Was it just noticing, or a put-down?</div></div></button>
+  <button class="door during" onclick="go('repairStart')"><div class="emoji">🤝</div><div><div class="dt">I upset someone</div><div class="ds">Understand, and make it right</div></div></button></div>`;};
+
+/* ---- I upset someone: perspective-taking + repair ---- */
+const REPAIR_WHAT=['I said something mean or teasing','I wouldn’t share or let them play','I broke or took something of theirs','I yelled or got too rough','I left them out','I told a secret or embarrassed them','I broke a promise','I ignored them','Something else'];
+const REPAIR_FEEL=['Sad 😢','Hurt 💔','Embarrassed 😳','Left out 😞','Angry 😠','Scared 😨','Confused 😕','Like I didn’t care about them 💧'];
+const APOLOGY_PARTS=[
+  {tag:'PART 1: SAY SORRY',t:'Name what you did',why:'A real sorry says the actual thing — not just "sorry." It shows you understand.',ex:'"I’m sorry I ______."',ph:'I’m sorry I...'},
+  {tag:'PART 2: SHOW YOU GET IT',t:'Say how it made them feel',why:'This is the part that really heals it — showing you understand THEIR feelings.',ex:'"That probably made you feel ______."',ph:'That probably made you feel...'},
+  {tag:'PART 3: MAKE IT RIGHT',t:'Offer to fix it',why:'What could help? Fixing what broke, giving space, or just doing better next time.',ex:'"Next time I’ll ______." or "Can I ______ to make it better?"',ph:'To make it right, I could...'},
+];
+let rp={};
+renderers.repairStart=()=>{flow={section:'repair'};rp={what:'',feels:[],apology:[]};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">I UPSET SOMEONE 🤝</span>
+  <div class="step-title">Being the one who messed up</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
+  <div class="card"><p>Everybody hurts someone’s feelings sometimes — even kind people. It doesn’t make you a bad person. What makes you brave is looking at it honestly and making it right. Let’s work through it together.</p></div>
+  <div class="card tip"><p>💜 No lecture here. Just you and me, figuring out how to fix it.</p></div>
+  <button class="btn" onclick="go('repairWhat')">I’m ready ›</button></div>`;};
+renderers.repairWhat=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT HAPPENED</span>
+  <div class="step-title">What did you do?</div><div class="step-sub">Just honest — no judging. This stays private on your device.</div>
+  ${REPAIR_WHAT.map((t,i)=>`<button class="choice" onclick="rpWhat(${i})"><span class="ce">•</span>${esc(t)}</button>`).join('')}
+  <input id="rpx" type="text" placeholder="…or say it in your own words" maxlength="70">
+  <button class="btn" onclick="rpWhatNext()">Next ›</button></div>`;};
+function rpWhat(i){rp.what=REPAIR_WHAT[i];const el=$('rpx');if(el)el.value=(i===REPAIR_WHAT.length-1)?'':REPAIR_WHAT[i];}
+function rpWhatNext(){const typed=($('rpx').value||'').trim();rp.what=typed||rp.what;if(!rp.what){$('rpx').focus();return;}go('repairFeel');}
+renderers.repairFeel=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">THEIR SHOES 👟</span>
+  <div class="step-title">How might THEY have felt?</div>
+  <div class="step-sub">This is the detective part — imagining it from their side. Tap any that fit.</div>
+  ${REPAIR_FEEL.map(t=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">💭</span>${esc(t)}</button>`).join('')}
+  <div class="card tip"><p>If you’re not sure, that’s okay — you could gently ask them how they felt.</p></div>
+  <button class="btn" onclick="rpFeelNext()">Next ›</button></div>`;};
+function rpFeelNext(){rp.feels=[...document.querySelectorAll('.choice.on')].map(b=>b.textContent.trim());go('repairCheck');}
+renderers.repairCheck=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WAS IT ON PURPOSE?</span>
+  <div class="step-title">Did you mean to hurt them?</div>
+  <div class="step-sub">Both answers are okay to admit. What matters is what you do now.</div>
+  <button class="choice" onclick="rpCheck('accident')"><span class="ce">🤷</span>No — it was an accident or I didn’t think</button>
+  <button class="choice" onclick="rpCheck('frustrated')"><span class="ce">😤</span>Kind of — I was mad or frustrated</button>
+  <button class="choice" onclick="rpCheck('onpurpose')"><span class="ce">💧</span>Yes — but now I feel bad about it</button></div>`;};
+function rpCheck(v){rp.why=v;
+  const msg=v==='accident'?'Accidents happen — and a kind person still cleans them up. An apology fixes accidents too.'
+    :v==='frustrated'?'Big feelings can make us do things we wouldn’t normally. The feeling was okay — this choice hurt someone. Both can be true, and you can make it right.'
+    :'That took real honesty to admit. Feeling bad means your heart knows what’s kind. Now let’s turn that into making it better.';
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">THAT’S OKAY 💜</span>
+  <div class="duo" style="margin:10px auto">${pip('',100)}</div>
+  <div class="card" style="text-align:left"><p>${msg}</p></div>
+  <button class="btn" onclick="go('repairBuild',{n:0})">Help me apologize 🤝</button>
+  <button class="btn ghost" onclick="finishFlow()">I’ll do it in my own way</button></div>`;}
+renderers.repairBuild=(d)=>{const i=d.n,p=APOLOGY_PARTS[i];
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${p.tag}</span>
+  <div class="step-title">${p.t}</div>
+  <div class="card tip"><p>${p.why}</p></div>
+  <div class="card"><p style="font-weight:700">Try starting with:</p><p style="color:var(--grape-deep);font-weight:800;font-size:16px">${esc(p.ex)}</p></div>
+  <textarea id="apa" placeholder="${esc(p.ph)}"></textarea>
+  <button class="btn" onclick="rpBuild(${i})">${i<APOLOGY_PARTS.length-1?'Next part ›':'See my whole apology ✅'}</button>
+  <div class="skipnote">Part ${i+1} of ${APOLOGY_PARTS.length} · you can keep it short</div></div>`;
+  const t=$('apa');if(t&&rp.apology[i])t.value=rp.apology[i];};
+function rpBuild(i){const t=$('apa');rp.apology[i]=t?t.value.trim().slice(0,200):'';
+  if(i<APOLOGY_PARTS.length-1)go('repairBuild',{n:i+1});else go('repairDone');}
+renderers.repairDone=()=>{const full=rp.apology.filter(Boolean).join(' ');
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">YOUR APOLOGY 🤝</span>
+  <div class="step-title">Here’s what you could say</div><div class="duo" style="margin:6px auto">${pip('happy',96)}</div>
+  ${full?`<div class="card" style="background:#eafaf3"><p style="font-size:16px;line-height:1.55">🗣️ ${esc(full)}</p></div>`:'<div class="card"><p>Whenever you’re ready, say it in your own words — sorry, how they felt, and how you’ll make it right.</p></div>'}
+  <div class="card tip"><p>💜 Say it when you’re calm, look at them if you can, and mean it. They might need a minute — that’s okay. You did the brave part.</p></div>
+  <button class="btn go" onclick="finishFlow()">I’m ready to make it right ✅</button></div>`;};
 
 /* ---- Thought Detective (5 questions) ---- */
 let td={};
@@ -894,13 +1014,13 @@ function gentleCeleb(top,title,big,sub){screen.innerHTML=`<div class="celebrate"
   <button class="btn ghost" style="max-width:260px" onclick="go('sunshine')">Back to Sunshine</button></div>`;burst();}
 
 /* ---- finish + celebrate ---- */
-function finishFlow(){const mode=flow.section==='feelComing'?'warning':flow.section==='helpNow'?'during':flow.section==='brave'?'brave':(flow.section==='people'||flow.section==='thought'||flow.section==='comment')?'people':'reflect';
+function finishFlow(){const mode=flow.section==='feelComing'?'warning':flow.section==='helpNow'?'during':flow.section==='brave'?'brave':(flow.section==='people'||flow.section==='thought'||flow.section==='comment'||flow.section==='repair')?'people':'reflect';
   const pts=PTS[mode]||1;award(pts);if(state.monsterShrink<6)state.monsterShrink++;recordUsageDay();
-  const entry={ts:Date.now(),section:flow.section,title:flow.warn||flow.fear||(flow.section==='helpNow'?'Got help with a big feeling':flow.section==='people'?'Practiced reading people':flow.section==='thought'?(td.thought?('Checked: "'+td.thought+'"'):'Checked a tricky thought'):'A moment'),
+  const entry={ts:Date.now(),section:flow.section,title:flow.warn||flow.fear||(flow.section==='helpNow'?'Got help with a big feeling':flow.section==='people'?'Practiced reading people':flow.section==='thought'?(td.thought?('Checked: "'+td.thought+'"'):'Checked a tricky thought'):flow.section==='repair'?(rp.what?('Made it right: '+rp.what):'Worked on an apology'):'A moment'),
     tool:flow.tool?(flow.tool.name||flow.tool):'',rateBefore:flow.rateBefore!=null?flow.rateBefore:null,rateAfter:flow.rateAfter!=null?flow.rateAfter:null,gotGrownUp:!!flow.gotGrownUp,reflect:flow.reflect||null,pts};
   state.log.unshift(entry);if(state.log.length>300)state.log=state.log.slice(0,300);save();go('celebrate',{entry,pts});}
 renderers.celebrate=(d)=>{const e=d.entry;const pair=e.rateBefore!=null&&e.rateAfter!=null;const dropped=pair&&e.rateAfter<e.rateBefore;const calm=e.rateAfter!=null&&e.rateAfter<4;
-  const labels={feelComing:'You caught a warning sign early!',helpNow:'You used the app while it was big!',brave:'You took a brave step!',people:'You practiced reading people!',thought:'You were a thought detective!',comment:'You listened like a detective!',reflect:'You looked back bravely!'};
+  const labels={feelComing:'You caught a warning sign early!',helpNow:'You used the app while it was big!',brave:'You took a brave step!',people:'You practiced reading people!',thought:'You were a thought detective!',comment:'You listened like a detective!',repair:'You made something right!',reflect:'You looked back bravely!'};
   const emo={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎'}[e.section]||'⭐';
   let spec=pair&&dropped?`You came to me at a ${e.rateBefore}, and came down to a ${e.rateAfter}. That took real work.`
     :e.section==='feelComing'?'You caught a warning sign before it got big. That\u2019s the thoughtful you in action.'
@@ -908,6 +1028,7 @@ renderers.celebrate=(d)=>{const e=d.entry;const pair=e.rateBefore!=null&&e.rateA
     :e.section==='people'?'You looked at a tricky moment in a fair, kind way. That\u2019s a real skill.'
     :e.section==='thought'?'You checked the clues instead of believing the first thought. A thought is not a fact!'
     :e.section==='comment'?'You heard what was really said, instead of what Tangle wanted you to hear.'
+    :e.section==='repair'?'You looked at your own part honestly and chose to make it right. That is one of the bravest things a person can do.'
     :e.section==='reflect'?'Looking back at a hard moment takes guts. That is how next time gets easier.'
     :'You showed up. That is the work, and you did it.';
   const cheer=pickRandom(CHEERS);
@@ -977,13 +1098,46 @@ renderers.wins=()=>{const pct=Math.round(state.monsterShrink/6*100);
     <div style="font-weight:800;color:var(--ink-soft);font-size:13px">points to spend · ${state.totalPoints} earned all-time</div></div></div>
   <div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">My moments</div>
   ${state.log.length?state.log.slice(0,25).map(l=>{const sub=(l.tool?'Used: '+esc(l.tool)+' · ':'')+(l.rateBefore!=null&&l.rateAfter!=null?'Feeling '+l.rateBefore+' → '+l.rateAfter:'logged');
-    const em={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎',comment:'💬',reflect:'🌈',sunshine:'☀️'}[l.section]||'⭐';
+    const em={feelComing:'🌤️',helpNow:'🔥',brave:'🦁',people:'🧩',thought:'🔎',comment:'💬',repair:'🤝',reflect:'🌈',sunshine:'☀️'}[l.section]||'⭐';
     return `<div class="logitem"><span class="lemoji">${em}</span><div style="flex:1"><div class="lt">${esc(l.title)}</div><div class="ls">${sub}</div></div><span class="badge">+${l.pts}⭐</span></div>`;}).join('')
     :`<div class="card"><p>No moments yet. Try a door on the home screen — every try is a win! 💜</p></div>`}
   <button class="btn" onclick="go('home')">Back home</button></div>`;};
 
+/* ---- REAL-WORLD REWARDS (kid requests, grown-up approves) ---- */
+function heldPoints(){return (state.pendingClaims||[]).reduce((s,c)=>s+(c.cost||0),0);}
+function spendablePoints(){return Math.max(0,state.points-heldPoints());}
+renderers.rewards=()=>{const rewards=state.rewards||[],pending=state.pendingClaims||[],earned=state.earnedRewards||[];const spend=spendablePoints(),held=heldPoints();
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">REAL REWARDS 🎁</span>
+  <div class="step-title">Trade points for real things</div><div class="step-sub">Picked by you and a grown-up. Ask for one — a grown-up says yes!</div>
+  <div class="card" style="display:flex;align-items:center;gap:14px"><div style="font-size:36px">⭐</div>
+    <div style="flex:1"><div style="font-family:'Baloo 2';font-size:28px;color:var(--grape-deep);line-height:1">${spend}</div>
+    <div style="font-weight:700;color:var(--ink-soft);font-size:13px">points to spend</div></div>
+    ${held?`<div style="text-align:right"><div style="font-size:13px;font-weight:800;color:var(--orchid)">${held}⭐</div><div style="font-size:10.5px;color:var(--ink-soft);font-weight:700">waiting on a grown-up</div></div>`:''}</div>
+  ${pending.length?`<div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">Waiting for a grown-up ⏳</div>
+    ${pending.map(c=>`<div class="shopitem" style="background:#fff6df"><div style="font-size:24px">⏳</div><b style="flex:1">${esc(c.name)}</b><span style="font-weight:800;color:var(--tangerine)">${c.cost}⭐</span></div>`).join('')}`:''}
+  <div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">Rewards you can get</div>
+  ${rewards.length?rewards.map(r=>{const isPending=pending.some(c=>c.rid===r.id);const canGet=spend>=r.cost&&!isPending;
+    return `<div class="shopitem"><div style="font-size:28px">🎁</div><div style="flex:1"><b>${esc(r.name)}</b><br><span style="font-size:13px;color:var(--ink-soft);font-weight:700">${r.cost} ⭐</span></div>
+      ${isPending?`<span class="tag on">Waiting ⏳</span>`:canGet?`<button class="tag buy" onclick="claimReward('${r.id}')">Get it!</button>`:`<span class="tag on">🔒</span>`}</div>`;}).join('')
+    :`<div class="card"><p>No rewards yet! Ask a grown-up to set some up in the Grown-Ups area. 💛</p></div>`}
+  ${earned.length?`<div class="step-sub" style="margin-top:16px;font-weight:800;color:var(--grape-deep)">You earned ✨</div>
+    ${earned.slice(0,8).map(e=>`<div class="shopitem" style="background:#eafaf3"><div style="font-size:22px">✨</div><div style="flex:1"><b>${esc(e.name)}</b><br><span style="font-size:12px;color:var(--ink-soft);font-weight:700">${esc(new Date(e.ts).toLocaleDateString())}</span></div><span class="tag use">Earned ✓</span></div>`).join('')}`:''}
+  <button class="btn" onclick="go('home')">Back home</button></div>`;};
+function claimReward(id){const r=(state.rewards||[]).find(x=>x.id===id);if(!r)return;
+  if(!state.pendingClaims)state.pendingClaims=[];
+  if(state.pendingClaims.some(c=>c.rid===id))return;
+  if(spendablePoints()<r.cost)return;
+  state.pendingClaims.unshift({cid:'c'+Date.now(),rid:id,name:r.name,cost:r.cost,ts:Date.now()});save();
+  screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:32px">🎁 ✨ 🎁</div>
+    <h2>Reward requested!</h2><div class="duo" style="margin:10px 0">${pip('happy',104)}</div>
+    <div class="big">You asked for: <b>${esc(r.name)}</b></div>
+    <div class="big" style="color:var(--grape)">Now a grown-up will look and say yes! 🌟</div>
+    <div class="big" style="font-size:13px;margin-top:6px">Your ${r.cost} points are held for now. They come back if a grown-up can\u2019t say yes.</div>
+    <button class="btn" style="max-width:260px" onclick="go('rewards')">Back to rewards</button>
+    <button class="btn ghost" style="max-width:260px" onclick="go('home')">Home</button></div>`;burst();}
+
 /* ---- CLOSET ---- */
-const ITEMS=[{id:'hat',e:'🎩',n:'Top Hat',c:5},{id:'crown',e:'👑',n:'Crown',c:10},{id:'bow',e:'🎀',n:'Big Bow',c:8},{id:'shades',e:'🕶️',n:'Cool Shades',c:6},{id:'star',e:'⭐',n:'Star Pal',c:7},{id:'rainbow',e:'🌈',n:'Rainbow',c:12}];
+const ITEMS=[{id:'hat',e:'🎩',n:'Top Hat',c:5},{id:'crown',e:'👑',n:'Crown',c:10},{id:'bow',e:'🎀',n:'Big Bow',c:8},{id:'shades',e:'🕶️',n:'Cool Shades',c:6},{id:'star',e:'⭐',n:'Star Pal',c:7},{id:'rainbow',e:'🌈',n:'Rainbow',c:12},{id:'party',e:'🥳',n:'Party Hat',c:6},{id:'flower',e:'🌸',n:'Flower Crown',c:11},{id:'cap',e:'🧢',n:'Ball Cap',c:6},{id:'headphones',e:'🎧',n:'Headphones',c:9},{id:'wizard',e:'🧙',n:'Wizard Hat',c:13},{id:'halo',e:'😇',n:'Halo',c:10},{id:'cowboy',e:'🤠',n:'Cowboy Hat',c:9},{id:'earmuffs',e:'🎓',n:'Grad Cap',c:12}];
 renderers.closet=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BLOOM\u2019S CLOSET 🎩</span>
   <div class="step-title">Dress up Bloom</div><div class="step-sub">Buy an item, then tap it to put it on. Tap again to take it off!</div>
   <div class="shrinkbox" style="text-align:center">${pip('',124)}</div>
@@ -996,7 +1150,7 @@ function closetTap(id){const it=ITEMS.find(x=>x.id===id);if(state.owned[id]){sta
   else if(state.points>=it.c){state.points-=it.c;state.owned[id]=true;state.wearing=id;save();go('closet');}else flashNeed(it.c);}
 
 /* ---- COLORS ---- */
-const THEMES=[{id:'grape',n:'Grape',c:0,a:'#f3ecfb',b:'#fdf2f0'},{id:'sunset',n:'Sunset',c:10,a:'#fff0e6',b:'#ffe3ec'},{id:'ocean',n:'Ocean',c:12,a:'#e3f7ff',b:'#e6fff5'},{id:'bubblegum',n:'Bubblegum',c:12,a:'#ffe9f8',b:'#efe6ff'},{id:'forest',n:'Forest',c:14,a:'#ecf7e6',b:'#f6f7df'},{id:'night',n:'Night Sky',c:18,a:'#2b2c4a',b:'#3a3d6b'}];
+const THEMES=[{id:'grape',n:'Grape',c:0,a:'#f3ecfb',b:'#fdf2f0'},{id:'sunset',n:'Sunset',c:10,a:'#fff0e6',b:'#ffe3ec'},{id:'ocean',n:'Ocean',c:12,a:'#e3f7ff',b:'#e6fff5'},{id:'bubblegum',n:'Bubblegum',c:12,a:'#ffe9f8',b:'#efe6ff'},{id:'forest',n:'Forest',c:14,a:'#ecf7e6',b:'#f6f7df'},{id:'night',n:'Night Sky',c:18,a:'#2b2c4a',b:'#3a3d6b'},{id:'cotton',n:'Cotton Candy',c:12,a:'#fdeafb',b:'#eafbff'},{id:'lemon',n:'Lemonade',c:12,a:'#fffbe0',b:'#fff0e6'},{id:'mint',n:'Fresh Mint',c:12,a:'#e6fff2',b:'#eafff7'},{id:'lavender',n:'Lavender',c:14,a:'#f1eaff',b:'#faf0ff'},{id:'peach',n:'Peach',c:12,a:'#ffeee4',b:'#ffe8ee'},{id:'berry',n:'Berry',c:16,a:'#ffe6ee',b:'#f3e6ff'}];
 renderers.colors=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">COLORS 🎨</span>
   <div class="step-title">Change your app colors</div><div class="step-sub">Buy a color set, then tap to use it.</div>
   ${THEMES.map(t=>{const owned=state.unlockedThemes.includes(t.id),on=state.theme===t.id;
@@ -1016,12 +1170,12 @@ renderers.gate=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span cla
   <button class="btn" onclick="checkPin()">Unlock</button><div id="pm" class="skipnote"></div></div>`;
   $('pin').focus();$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});};
 function checkPin(){if($('pin').value===(state.pin||'1234'))go('parentHome');else $('pm').textContent='That PIN is not right.';}
-renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it coming',helpNow:'I need help now',brave:'Be brave',people:'People detective',thought:'Thought detective',comment:'Comment or judgment',reflect:'After the storm',sunshine:'Sunshine'};
+renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it coming',helpNow:'I need help now',brave:'Be brave',people:'People detective',thought:'Thought detective',comment:'Comment or judgment',repair:'Making it right',reflect:'After the storm',sunshine:'Sunshine'};
   const counts={};Object.keys(sec).forEach(k=>counts[k]=0);state.log.forEach(e=>{if(counts[e.section]!=null)counts[e.section]++;});const maxc=Math.max(1,...Object.values(counts));
   const ba=state.log.filter(e=>typeof e.rateBefore==='number'&&typeof e.rateAfter==='number');const drop=ba.length?(ba.reduce((s,e)=>s+(e.rateBefore-e.rateAfter),0)/ba.length):null;
   const sk={};state.log.forEach(e=>{if(e.tool){const n=e.tool;sk[n]=(sk[n]||0)+1;}});const top=Object.entries(sk).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const fmt=t=>{const d=new Date(t);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});};
-  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GROWN-UP ZONE 🔒</span><div class="step-title">${esc(state.name)||'Your child'}\u2019s week</div>
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GROWN-UP ZONE 🔒</span><div class="step-title">This week</div>
   <div class="card"><p class="skipnote" style="text-align:left;margin:0">All data stays on this device. Nothing is sent anywhere, and your child can\u2019t open this without the PIN.</p></div>
   <div class="statrow"><div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">MOMENTS</div></div>
     <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
@@ -1046,18 +1200,36 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
       return rank.length?`<div style="font-weight:800;color:var(--grape-deep);margin-top:10px;font-size:14px">Which tools calm them most</div>${rank.map(r=>`<div class="barrow"><span style="flex:1;font-size:12.5px">${esc(r[0])}</span><b>−${r[1].toFixed(1)}</b></div>`).join('')}`:'';})()}</div>
   <div class="card"><h3>Recent moments</h3>${state.log.length?state.log.slice(0,15).map(e=>{const r=(e.rateBefore!=null&&e.rateAfter!=null)?` · ${e.rateBefore}→${e.rateAfter}`:'';const g=e.gotGrownUp?' · asked for a grown-up':'';
     return `<div style="font-size:13px;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,.12)"><b>${esc(sec[e.section]||e.section)}</b> <span style="color:var(--ink-soft)">${fmt(e.ts)}</span>${r}${g}</div>`;}).join(''):'<p>Nothing logged yet.</p>'}</div>
+  <div class="card"><h3>Real-world rewards 🎁</h3>
+    <p class="skipnote" style="text-align:left">Set up things your child can trade points for. When they request one, it shows up here for you to approve.</p>
+    ${(state.pendingClaims||[]).length?`<div style="font-weight:800;color:var(--tangerine);margin-top:10px;font-size:14px">Waiting for you ⏳</div>
+      ${state.pendingClaims.map(c=>`<div class="shopitem" style="background:#fff6df;flex-wrap:wrap"><div style="font-size:22px">⏳</div><div style="flex:1;min-width:120px"><b>${esc(c.name)}</b><br><span style="font-size:12px;color:var(--ink-soft);font-weight:700">${c.cost}⭐ · asked ${esc(new Date(c.ts).toLocaleDateString())}</span></div>
+        <button class="tag use" onclick="approveClaim('${c.cid}')">Approve ✓</button><button class="tag" style="background:#f3d6d6;color:#b4283a" onclick="declineClaim('${c.cid}')">Decline</button></div>`).join('')}`:''}
+    <div style="font-weight:800;color:var(--grape-deep);margin-top:12px;font-size:14px">Your rewards</div>
+    ${(state.rewards||[]).map(r=>`<div class="shopitem" style="flex-wrap:wrap"><input type="text" value="${esc(r.name)}" id="rn_${r.id}" style="flex:1;min-width:120px;margin:0;font-size:14px;padding:8px"><input type="text" inputmode="numeric" value="${r.cost}" id="rc_${r.id}" style="width:64px;margin:0;font-size:14px;padding:8px;text-align:center">
+      <button class="tag use" onclick="saveReward('${r.id}')">Save</button><button class="tag" style="background:#f3d6d6;color:#b4283a" onclick="deleteReward('${r.id}')">🗑️</button></div>`).join('')}
+    <button class="btn ghost" onclick="addReward()">+ Add a reward</button>
+    ${(state.rewards||[]).length<1?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:13px">Quick ideas — tap to add:</div>
+      <div class="chipwrap">${REWARD_IDEAS.map((r,i)=>`<button class="chip" onclick="addRewardIdea(${i})">${esc(r[0])} · ${r[1]}⭐</button>`).join('')}</div>`:''}</div>
   <div class="card"><h3>Settings</h3>
     <div><b>Faith level</b><br><span class="skipnote" style="text-align:left">Shapes the "You Are Loved" moments and the prayer tool. Your child sees nothing about this setting.</span></div>
     ${[['none','None','Fully secular. Warm encouragement only.'],['light','Light','The Golden Rule and kindness. No scripture.'],['medium','Medium','Short verses with the message.'],['high','High','Full faith moments, with a prayer to say.']]
       .map(l=>`<button class="choice ${state.faithLevel===l[0]?'on':''}" style="margin-top:8px" onclick="setFaith('${l[0]}')"><span class="ce">${state.faithLevel===l[0]?'✅':'⬜'}</span><span><b>${l[1]}</b><br><span style="font-weight:600;font-size:12.5px;opacity:.85">${l[2]}</span></span></button>`).join('')}
     <div style="height:12px"></div>
-    <button class="btn ghost" onclick="renameChild()">Edit child\u2019s name (${esc(state.name)||'not set'})</button>
     <button class="btn ghost" onclick="changePin()">Change PIN</button>
     <button class="btn ghost" onclick="go('about')">About / Parent Info</button>
     <button class="btn ghost" style="color:#d8334a" onclick="wipe()">Reset all data on this device</button></div>
-  <button class="btn" onclick="go('home')">Back to ${esc(state.name)||'kid'}\u2019s app</button></div>`;};
+  <button class="btn" onclick="go('home')">Back to the app</button></div>`;};
 function setFaith(v){state.faithLevel=v;state.faith=(v!=='none');save();go('parentHome');}
-function renameChild(){const v=prompt("Child\u2019s name:",state.name||'');if(v!=null){state.name=v.trim().slice(0,18);save();go('parentHome');}}
+function addReward(){if(!state.rewards)state.rewards=[];state.rewards.push({id:'r'+Date.now(),name:'New reward',cost:20});save();go('parentHome');}
+function addRewardIdea(i){if(!state.rewards)state.rewards=[];const r=REWARD_IDEAS[i];state.rewards.push({id:'r'+Date.now(),name:r[0],cost:r[1]});save();go('parentHome');}
+function saveReward(id){const r=(state.rewards||[]).find(x=>x.id===id);if(!r)return;const nb=$('rn_'+id),cb=$('rc_'+id);if(nb&&nb.value.trim())r.name=nb.value.trim().slice(0,50);if(cb){const n=parseInt(cb.value,10);if(!isNaN(n)&&n>0)r.cost=n;}save();go('parentHome');}
+function deleteReward(id){if(!confirm('Delete this reward? Any pending request for it is removed too.'))return;state.rewards=(state.rewards||[]).filter(x=>x.id!==id);state.pendingClaims=(state.pendingClaims||[]).filter(c=>c.rid!==id);save();go('parentHome');}
+function approveClaim(cid){const i=(state.pendingClaims||[]).findIndex(c=>c.cid===cid);if(i<0)return;const c=state.pendingClaims[i];
+  if(state.points<c.cost){alert('Not enough points for this now — decline it instead.');return;}
+  state.points-=c.cost;if(!state.earnedRewards)state.earnedRewards=[];state.earnedRewards.unshift({name:c.name,cost:c.cost,ts:Date.now()});
+  state.pendingClaims.splice(i,1);save();go('parentHome');}
+function declineClaim(cid){const i=(state.pendingClaims||[]).findIndex(c=>c.cid===cid);if(i<0)return;if(!confirm('Decline this request? The points go back to your child.'))return;state.pendingClaims.splice(i,1);save();go('parentHome');}
 function changePin(){const v=prompt('Set a new 4-digit PIN:',state.pin||'1234');if(v!=null){const c=v.replace(/\D/g,'').slice(0,4);if(c.length===4){state.pin=c;save();alert('PIN updated.');}else alert('PIN must be 4 digits.');}}
 function wipe(){if(confirm('Erase all points, rewards, and history on this device? This cannot be undone.')){state=freshState();save();setTheme();go('disclaimer');}}
 
@@ -1072,6 +1244,7 @@ renderers.distract=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span
   <button class="choice" onclick="go('factT')"><span class="ce">🤓</span>Tell me a fact</button>
   <button class="choice" onclick="go('bubblePop')"><span class="ce">🫧</span>Pop the bubbles</button>
   <button class="choice" onclick="go('mathPick')"><span class="ce">🔢</span>Math bubble pop</button>
+  <button class="choice" onclick="go('countGame')"><span class="ce">🔎</span>Counting hunt</button>
   <button class="choice" onclick="go('ideaT')"><span class="ce">💡</span>Give me something to do</button>
   <button class="btn go" onclick="afterTool()">Done — I feel better ✅</button></div>`;};
 
@@ -1080,6 +1253,20 @@ renderers.ideaT=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="t
   <div class="duo" style="margin:8px auto">${pip('',92)}</div>
   <button class="btn" onclick="renderers.ideaT()">Another! →</button>
   <button class="btn ghost" onclick="goBack()">← Back to distractions</button></div>`;};
+const COUNT_HUNTS=['things that are BLUE 🔵','things that are round ⭕','things made of wood 🪵','things you could sit on 🪑','soft things 🧸','things with words or letters 🔤','things that are your favorite color 🎨','things that make light 💡','things smaller than your hand ✋','things that are green 🟢','windows or doors 🚪','things that start with the letter S 🅂','things you can hear right now 👂','things that are older than you 📻','things you are thankful for 💛'];
+let cg={};
+renderers.countGame=()=>{cg={hunt:pickRandom(COUNT_HUNTS),n:0};renderCount();};
+function renderCount(){screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">COUNTING HUNT 🔎</span>
+  <div class="step-sub" style="margin-top:8px">Look around you and find as many as you can. Tap for each one you spot — no rush.</div>
+  <div class="card" style="background:linear-gradient(160deg,#e8f4ff,#eafaf3);margin-top:12px"><p style="font-size:13px;font-weight:800;color:var(--ink-soft)">How many can you find?</p>
+    <h3 style="font-size:22px;color:var(--grape-deep);margin-top:4px">${esc(cg.hunt)}</h3></div>
+  <div style="font-family:'Baloo 2';font-size:72px;color:var(--grape);line-height:1;margin:14px" id="cgn">${cg.n}</div>
+  <div class="duo" style="margin:2px auto 10px">${pip('',88)}</div>
+  <button class="btn go" onclick="cgFound()">I found one! +1 🔎</button>
+  <button class="btn ghost" onclick="cg.hunt=pickRandom(COUNT_HUNTS);cg.n=0;renderCount()">New thing to hunt 🔄</button>
+  <button class="btn ghost" onclick="goBack()">← Back to distractions</button></div>`;}
+function cgFound(){cg.n++;const el=$('cgn');if(el){el.textContent=cg.n;el.style.transform='scale(1.25)';setTimeout(()=>{if($('cgn'))el.style.transform='scale(1)';},150);}popSound();
+  if(cg.n===10){const w=$('cgn');if(w)w.textContent='🎉';setTimeout(()=>{if($('cgn'))$('cgn').textContent=cg.n;},700);}}
 renderers.factT=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">DID YOU KNOW? 🤓</span>
   <div class="card" style="margin-top:14px"><p style="font-size:18px;font-weight:700;line-height:1.45">${esc(pickRandom(FACTS))}</p></div>
   <button class="btn" onclick="renderers.factT()">Another! →</button>
