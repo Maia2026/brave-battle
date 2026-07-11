@@ -479,7 +479,8 @@ renderers.disclaimer=()=>{screen.innerHTML=`<div class="pad fade" style="padding
     <p style="font-weight:800;margin-top:12px">Before you start, please know:</p>
     <p style="line-height:1.6;margin-top:4px">• This app is a support tool — it is not a substitute for therapy or medical care.<br>
     • If your child is in crisis, please call or text <a href="tel:988" style="color:var(--grape);font-weight:800">988</a> (Suicide &amp; Crisis Lifeline).<br>
-    • This is an early demo, and we’ll check in with you for feedback.</p>
+    • This is an early demo, and we’ll check in with you for feedback.<br>
+    • Brave Battle includes gentle, optional faith content (default: light). A grown-up can change the level — or turn it off completely — any time in the Grown-Ups area. Choose the option that best fits your child and family.</p>
   </div>
   <button class="btn" onclick="acknowledge()">I understand ›</button>
   <button class="btn ghost" onclick="openCrisis()">Crisis Resources</button>
@@ -505,6 +506,21 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
   <div class="card"><h3>About Brave Battle</h3>
     <p>This is a demo of <b>Brave Battle</b>, provided by Brave Kids United Inc, an Indiana nonprofit corporation. Brave Battle is designed to help children practice coping skills and build confidence when working through everyday emotional challenges such as anxiety and worry.</p>
     <p style="margin-top:8px">This demo is an early preview. The full Brave Battle app, when it launches, will include personalized features, character design, faith-level options, parent and therapist tools, and much more.</p></div>
+  <div class="card"><h3>Inside the Grown-Ups area 🔒</h3>
+    <p>The Grown-Ups area is your space, protected by a PIN you set — your child can\u2019t open it without the numbers. Inside, you\u2019ll find:</p>
+    <p style="margin-top:8px">• <b>A gentle check-in on how things are going</b> — recent moods, moments they\u2019ve logged, and which tools seem to calm them most.<br>
+    • <b>After-the-storm patterns</b> — common triggers and where big feelings tend to come up.<br>
+    • <b>Real-world rewards</b> — set up things your child can trade their points for, and approve their requests.<br>
+    • <b>Faith settings</b> — choose the level that fits your family (below).<br>
+    • <b>Your PIN and a reset option</b>, any time.</p>
+    <p style="margin-top:8px">Nothing here is a grade or a score. It\u2019s just a warm window into how your child is using Brave Battle, so you can support them.</p></div>
+  <div class="card"><h3>Choosing a faith level 🙏</h3>
+    <p>Brave Battle is made for families of every faith and none. A grown-up picks the level in the Grown-Ups area, and your child only ever sees the content you\u2019ve chosen:</p>
+    <p style="margin-top:8px">• <b>None</b> — fully secular. Warm encouragement only, with no faith language.<br>
+    • <b>Light</b> (the default) — the Golden Rule and kindness. No scripture.<br>
+    • <b>Medium</b> — short, gentle verses alongside the message.<br>
+    • <b>High</b> — full faith moments, each with a short prayer to say if they\u2019d like.</p>
+    <p style="margin-top:8px">You can change this any time, and it takes effect right away. Choose whatever best fits your child and family.</p></div>
   <div class="card"><h3>Important — Not a Substitute for Care</h3>
     <p>Brave Battle is a support tool, not a replacement for professional care. It does not diagnose, treat, or cure any medical or psychological condition.</p>
     <p style="margin-top:8px">This app is not designed for use in crisis situations or for conditions that require professional treatment, including (but not limited to) trauma, eating disorders, severe depression, suicidal thoughts, self-harm, psychosis, or substance abuse. For any of these, please contact a licensed professional immediately.</p>
@@ -1013,7 +1029,8 @@ renderers.lovedMoment=()=>{const useFaith=faithOn();const m=useFaith?pickRandom(
     ${useFaith?`<p style="font-size:13px;color:#8b6e3a;font-style:italic;font-weight:700;margin-top:12px;text-align:center">— ${esc(m.ref)}</p>`:''}
   </div>
   ${useFaith&&m.pray?`<div class="card tip" style="text-align:left"><h3>A prayer, if you want it 🙏</h3><p>${esc(m.pray)}</p></div>`:''}
-  <button class="btn" onclick="lovedDone()">${useFaith?'Amen 💜':'Thank you 💜'}</button></div>`;};
+  <button class="btn" onclick="lovedDone()">${useFaith?'Amen 💜':'Thank you 💜'}</button>
+  ${useFaith?`<div class="skipnote" style="margin-top:10px">*Faith messages are optional — a grown-up can adjust them in the Grown-Ups area.</div>`:''}</div>`;};
 function lovedDone(){state.gratitudes.unshift({ts:Date.now(),type:'faith'});award(PTS.sunshine);logSunshine('A You Are Loved moment');recordUsageDay();save();
   gentleCeleb('💛 ✨ 💛',faithOn()?'Amen.':'Take that with you.','You are loved. Always. 💜','');}
 function gentleCeleb(top,title,big,sub){screen.innerHTML=`<div class="celebrate" id="cb"><div style="font-size:30px">${top}</div>
