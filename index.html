@@ -475,11 +475,11 @@ renderers.disclaimer=()=>{screen.innerHTML=`<div class="pad fade" style="padding
   <div style="text-align:center"><div class="duo">${pip('',96)}</div>
   <div class="step-title" style="font-size:27px;margin-top:8px">Welcome to Brave Battle</div></div>
   <div class="card" style="margin-top:14px">
-    <p style="font-weight:700;line-height:1.5">Brave Battle is a tester app from <b>Brave Kids United</b>, a nonprofit helping kids build confidence and coping skills.</p>
+    <p style="font-weight:700;line-height:1.5">This is a demo of <b>Brave Battle</b>, from Brave Kids United, a nonprofit helping kids build confidence and coping skills.</p>
     <p style="font-weight:800;margin-top:12px">Before you start, please know:</p>
     <p style="line-height:1.6;margin-top:4px">• This app is a support tool — it is not a substitute for therapy or medical care.<br>
     • If your child is in crisis, please call or text <a href="tel:988" style="color:var(--grape);font-weight:800">988</a> (Suicide &amp; Crisis Lifeline).<br>
-    • This is a tester version. We will check in with you for feedback.</p>
+    • This is an early demo, and we’ll check in with you for feedback.</p>
   </div>
   <button class="btn" onclick="acknowledge()">I understand ›</button>
   <button class="btn ghost" onclick="openCrisis()">Crisis Resources</button>
@@ -500,11 +500,11 @@ renderers.crisis=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span c
 /* ---- About / Parent Info (reachable from home; ungated) ---- */
 renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><span class="step-tag">ABOUT &amp; PARENT INFO 💜</span>
   <div class="step-title">About Brave Battle</div>
-  <div class="card" style="background:linear-gradient(160deg,#f6e9ff,#fff6df)"><h3>Battle Big Feelings, Together</h3>
+  <div class="card" style="background:linear-gradient(160deg,#f6e9ff,#fff6df)"><div style="font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--grape);text-transform:uppercase;margin-bottom:4px">Our Mission Statement</div><h3>Battle Big Feelings, Together</h3>
     <p>Helping children regulate their emotions, build confidence, and find coping skills that work for them — through tools they actually want to use, that capture real data from real moments to inform families, therapists, and kids together. Made accessible to every family who needs it.</p></div>
   <div class="card"><h3>About Brave Battle</h3>
-    <p>Brave Battle is a tester app provided by Brave Kids United Inc, an Indiana nonprofit corporation. It is designed to help children practice coping skills and build confidence when working through everyday emotional challenges such as anxiety and worry.</p>
-    <p style="margin-top:8px">This is an early tester version. The real app, when fully launched, will include personalized features, character design, faith-level options, parent and therapist tools, and much more.</p></div>
+    <p>This is a demo of <b>Brave Battle</b>, provided by Brave Kids United Inc, an Indiana nonprofit corporation. Brave Battle is designed to help children practice coping skills and build confidence when working through everyday emotional challenges such as anxiety and worry.</p>
+    <p style="margin-top:8px">This demo is an early preview. The full Brave Battle app, when it launches, will include personalized features, character design, faith-level options, parent and therapist tools, and much more.</p></div>
   <div class="card"><h3>Important — Not a Substitute for Care</h3>
     <p>Brave Battle is a support tool, not a replacement for professional care. It does not diagnose, treat, or cure any medical or psychological condition.</p>
     <p style="margin-top:8px">This app is not designed for use in crisis situations or for conditions that require professional treatment, including (but not limited to) trauma, eating disorders, severe depression, suicidal thoughts, self-harm, psychosis, or substance abuse. For any of these, please contact a licensed professional immediately.</p>
@@ -512,7 +512,7 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
     <p style="margin-top:8px"><b>If your child is in crisis:</b><br>• Call or text <a href="tel:988" style="color:var(--grape);font-weight:800">988</a> (Suicide &amp; Crisis Lifeline)<br>• Text HOME to <a href="sms:741741" style="color:var(--grape);font-weight:800">741741</a> (Crisis Text Line)<br>• Call <a href="tel:911" style="color:var(--grape);font-weight:800">911</a> for emergencies</p></div>
   <div class="card"><h3>Your Data</h3>
     <p>This is a <b>demo (tester) version</b> of Brave Battle, and it is built to keep your child's information on the device.</p>
-    <p style="margin-top:8px">• <b>No server, by design — for this demo.</b> This tester version does not send anything anywhere. There is no account, no login, and no Brave Kids United Inc server collecting information — so nothing your child does in this demo travels back to us. We never receive it, and we can't see it.<br>
+    <p style="margin-top:8px">• <b>No server, by design — for this demo.</b> This demo does not send anything anywhere. There is no account, no login, and no Brave Kids United Inc server collecting information — so nothing your child does in this demo travels back to us. We never receive it, and we can't see it.<br>
     • <b>Saved on this device only.</b> To make the app work, it stores a few things right on the device: their points and rewards, and anything they type in the app (like a gratitude note or a worry they check). This stays on the device and is visible only in the Grown-Ups area on that same device.<br>
     • <b>No personal info requested.</b> No emails, no ages, no contact information.<br>
     • <b>You're in control.</b> To erase everything, tap "Reset all data" in the Grown-Ups section, or clear this app's data from the device.</p>
@@ -520,7 +520,17 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
     <p style="margin-top:8px"><b>Looking ahead:</b> the full version of Brave Battle (still in development) is planned to include online features such as saved accounts, personalization, and parent and therapist tools, which will use a server. That future version will come with its own, updated privacy information before it is used — this notice covers the demo only.</p>
     <p style="margin-top:8px">Your feedback comes through talking with us directly, not through the app.</p></div>
   <div class="card"><h3>Contact / Feedback</h3>
-    <p>We'd love to hear from you. Reach Christina at <a href="mailto:cdevine628@gmail.com" style="color:var(--grape);font-weight:800">cdevine628@gmail.com</a> with any feedback, questions, or concerns.</p></div>
+    <p>We'd love to hear from you. Reach Christina at <a href="mailto:Christina@BraveKidsUnited.org" style="color:var(--grape);font-weight:800">Christina@BraveKidsUnited.org</a> with any feedback, questions, or concerns.</p></div>
+  <div class="card" style="background:linear-gradient(160deg,#eaf6f8,#fff6df)"><h3>Stay connected 💛</h3>
+    <p>Brave Battle is one small piece of a bigger mission at <b>Brave Kids United Inc</b> — building warm, effective tools for kids working through big feelings.</p>
+    <p style="margin-top:8px">If you'd like to follow along as things develop — new features, the full app, and ways to get involved — we'd love to stay in touch. This is entirely optional, and it happens on our sign-up page, not inside this app.</p>
+    <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--grape);color:#fff;font-weight:800;padding:13px;border-radius:14px;text-decoration:none;margin-top:12px">✉️ Keep me in the loop</a>
+    <p style="margin-top:14px"><b>Want to get more involved?</b> As a growing nonprofit, we\u2019re building our team — and we\u2019re especially looking for:</p>
+    <p style="margin-top:6px">• <b>Board members</b> — people who believe in the mission and want to help guide and grow the organization.<br>
+    • <b>A clinician advisory board</b> — therapists, counselors, and child mental-health professionals to help shape the tools and keep them clinically sound.</p>
+    <p style="margin-top:8px">Have questions, or want to get involved? Email Christina at <a href="mailto:Christina@BraveKidsUnited.org" style="color:var(--grape);font-weight:800">Christina@BraveKidsUnited.org</a>.</p>
+    <p style="margin-top:12px">Learn more at <b>bravekidsunited.org</b> <span style="color:var(--ink-soft);font-weight:700">(coming soon)</span></p></div>
+
   <div class="card"><h3>Legal</h3>
     <p class="small">© 2026 Brave Kids United Inc — All rights reserved.<br>
     Brave Battle™ is a trademark of Brave Kids United Inc.<br>
@@ -1176,7 +1186,13 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
   const sk={};state.log.forEach(e=>{if(e.tool){const n=e.tool;sk[n]=(sk[n]||0)+1;}});const top=Object.entries(sk).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const fmt=t=>{const d=new Date(t);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});};
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">GROWN-UP ZONE 🔒</span><div class="step-title">This week</div>
-  <div class="card"><p class="skipnote" style="text-align:left;margin:0">All data stays on this device. Nothing is sent anywhere, and your child can\u2019t open this without the PIN.</p></div>
+  <div class="card"><p style="text-align:left;margin:0;font-weight:800;font-size:15px">Welcome to your Grown-Up Zone. 💛</p>
+    <p style="text-align:left;margin-top:8px;font-size:13.5px">Thank you for helping us test this demo of Brave Battle. This is an early look at what the full app will become — part of Brave Kids United\u2019s mission to help kids work through big feelings.</p>
+    <p style="text-align:left;margin-top:8px;font-size:13.5px">Everything here stays on this device. Nothing is sent anywhere, and once you set your PIN, your child can\u2019t get into this section without it.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <a onclick="go('about')" style="display:block;text-align:center;background:var(--lilac);color:var(--grape-deep);font-weight:800;padding:11px;border-radius:12px;cursor:pointer;font-size:14px">🔎 Learn about our mission</a>
+      <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--lilac);color:var(--grape-deep);font-weight:800;padding:11px;border-radius:12px;text-decoration:none;font-size:14px">✉️ Stay connected — updates as we grow</a>
+    </div></div>
   <div class="statrow"><div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">MOMENTS</div></div>
     <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
     <div class="statcard"><div class="statnum">${currentStreak()}</div><div class="statlbl">DAY STREAK</div></div></div>
