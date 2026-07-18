@@ -207,13 +207,19 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
 </style>
 
 <div id="splash">
-  <svg width="118" height="118" viewBox="0 0 200 200" aria-hidden="true"><g>
-    <circle cx="100" cy="100" r="58" fill="#6e8ff5"/>
-    <ellipse cx="84" cy="94" rx="8" ry="12" fill="#23305c"/><ellipse cx="116" cy="94" rx="8" ry="12" fill="#23305c"/>
-    <circle cx="87" cy="89" r="3" fill="#fff"/><circle cx="119" cy="89" r="3" fill="#fff"/>
-    <path d="M86 116 Q100 130 114 116" stroke="#23305c" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <circle cx="74" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/><circle cx="126" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/>
-  </g></svg>
+  <svg width="150" height="150" viewBox="0 0 200 200" aria-hidden="true">
+    <defs><radialGradient id="spsh" cx="0.36" cy="0.3" r="0.8"><stop offset="0%" stop-color="#d6e2ff" stop-opacity="0.95"/><stop offset="55%" stop-color="#6e8ff5" stop-opacity="0"/></radialGradient></defs>
+    <path d="M100 12 L176 40 L176 116 Q176 176 100 196 Q24 176 24 116 L24 40 Z" fill="#1f3a5f"/>
+    <path d="M100 26 L163 49 L163 114 Q163 165 100 184 Q37 165 37 114 L37 49 Z" fill="#5bc0ce"/>
+    <g transform="translate(100,104) scale(0.52) translate(-100,-100)">
+      <ellipse cx="152.0" cy="100.0" rx="45" ry="31" fill="#7d9ff5" transform="rotate(0 152.0 100.0)"/><ellipse cx="116.1" cy="149.5" rx="45" ry="31" fill="#7d9ff5" transform="rotate(72 116.1 149.5)"/><ellipse cx="57.9" cy="130.6" rx="45" ry="31" fill="#7d9ff5" transform="rotate(144 57.9 130.6)"/><ellipse cx="57.9" cy="69.4" rx="45" ry="31" fill="#7d9ff5" transform="rotate(216 57.9 69.4)"/><ellipse cx="116.1" cy="50.5" rx="45" ry="31" fill="#7d9ff5" transform="rotate(288 116.1 50.5)"/>
+      <circle cx="100" cy="100" r="55" fill="#6e8ff5"/><circle cx="100" cy="100" r="55" fill="url(#spsh)"/>
+      <ellipse cx="84" cy="94" rx="8" ry="12" fill="#23305c"/><ellipse cx="116" cy="94" rx="8" ry="12" fill="#23305c"/>
+      <circle cx="87" cy="89" r="3" fill="#fff"/><circle cx="119" cy="89" r="3" fill="#fff"/>
+      <path d="M86 116 Q100 130 114 116" stroke="#23305c" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="74" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/><circle cx="126" cy="111" r="6.5" fill="#ff9ec7" opacity="0.65"/>
+      <path d="M83 148 L76 170 L97 163 Z" fill="#3fc6a0"/><path d="M117 148 L124 170 L103 163 Z" fill="#3fc6a0"/>
+    </g></svg>
   <div class="sn">Brave Battle</div>
   <div class="ss">Battle Big Feelings, Together</div>
   <div class="ss" style="font-size:13px;opacity:.85">A Brave Kids United project</div>
