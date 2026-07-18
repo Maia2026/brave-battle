@@ -4,6 +4,16 @@
 <title>Brave Battle</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#a64fc9">
+<meta name="description" content="Brave Battle is a warm, kid-friendly app from Brave Kids United Inc that helps children work through big feelings — anger, worry, and more. A preview of a work in progress.">
+<meta property="og:title" content="Brave Battle">
+<meta property="og:description" content="A warm app helping kids work through big feelings. A preview from Brave Kids United Inc.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://brave-battle.vercel.app/">
+<meta property="og:image" content="https://brave-battle.vercel.app/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Brave Battle">
+<meta name="twitter:description" content="A warm app helping kids work through big feelings. A preview from Brave Kids United Inc.">
+<meta name="twitter:image" content="https://brave-battle.vercel.app/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Brave Battle">
@@ -39,7 +49,7 @@ body{
   background:linear-gradient(170deg,var(--bg1),var(--bg2)); background-attachment:fixed;
   -webkit-font-smoothing:antialiased; min-height:100dvh; transition:background .5s;
 }
-#screen{max-width:470px;margin:0 auto;min-height:100dvh;padding-bottom:46px}
+#screen{max-width:470px;margin:0 auto;min-height:100dvh;padding-bottom:72px}
 h1,h2,h3,.disp{font-family:'Baloo 2',cursive;margin:0}
 .pad{padding:0 18px 40px}
 .fade{animation:fade .3s ease}
@@ -211,7 +221,7 @@ input[type=range]{width:100%;margin-top:14px;accent-color:var(--grape);height:36
 </div>
 <div id="screen"></div>
 <footer id="appfoot">
-  <span class="fc">© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.</span>
+  <span class="fc">© 2026 Brave Kids United Inc · Brave Battle™ · Preview of a work in progress. All content and design are proprietary. · Not medical advice.</span>
   <button class="fh" onclick="openCrisis()" aria-label="Crisis resources">🆘 Help</button>
 </footer>
 
@@ -253,7 +263,6 @@ function freshState(){return{
   faith:true, faithLevel:'light', pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[], rewards:[], pendingClaims:[], earnedRewards:[],
   usedDays:{}, streakCount:0, lastUseDay:''
 };}
-const FOOT_TEXT='© 2026 Brave Kids United Inc · Brave Battle™ · Not medical advice.';
 const ACK_VERSION=2; // bump to re-show the welcome/disclosures to everyone after legal changes
 function ackOK(){return state.acknowledged && state.ackVersion===ACK_VERSION;}
 function migrate(s){if(!s)return freshState();const b=freshState();
@@ -484,6 +493,12 @@ renderers.disclaimer=()=>{screen.innerHTML=`<div class="pad fade" style="padding
   </div>
   <button class="btn" onclick="acknowledge()">I understand ›</button>
   <button class="btn ghost" onclick="openCrisis()">Crisis Resources</button>
+  <div class="card" style="background:linear-gradient(160deg,#eaf6f8,#fff6df);margin-top:14px"><p style="font-weight:800;text-align:center;margin:0">Grown-ups — stay connected 💛</p>
+    <p style="font-size:13px;text-align:center;margin-top:4px">We’ll let you know when the full app is ready.</p>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="flex:1;text-align:center;background:var(--grape);color:#fff;font-weight:800;padding:10px;border-radius:12px;text-decoration:none;font-size:13px">✉️ Subscribe</a>
+      <a href="https://www.facebook.com/BraveKidsUnited/" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#1877f2;color:#fff;font-weight:800;padding:10px;border-radius:12px;text-decoration:none;font-size:13px">Facebook</a>
+    </div></div>
   <div class="skipnote">This shows once on this device.</div></div>`;};
 function acknowledge(){state.acknowledged=true;state.ackVersion=ACK_VERSION;save();go(state.onboarded?'home':'onboard');}
 
@@ -541,6 +556,7 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
     <p>Brave Battle is one small piece of a bigger mission at <b>Brave Kids United Inc</b> — building warm, effective tools for kids working through big feelings.</p>
     <p style="margin-top:8px">If you'd like to follow along as things develop — new features, the full app, and ways to get involved — we'd love to stay in touch. This is entirely optional, and it happens on our sign-up page, not inside this app.</p>
     <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--grape);color:#fff;font-weight:800;padding:13px;border-radius:14px;text-decoration:none;margin-top:12px">✉️ Keep me in the loop</a>
+    <a href="https://www.facebook.com/BraveKidsUnited/" target="_blank" rel="noopener" style="display:block;text-align:center;background:#1877f2;color:#fff;font-weight:800;padding:11px;border-radius:14px;text-decoration:none;margin-top:8px">Follow us on Facebook</a>
     <p style="margin-top:14px"><b>Want to get more involved?</b> As a growing nonprofit, we\u2019re building our team — and we\u2019re especially looking for:</p>
     <p style="margin-top:6px">• <b>Board members</b> — people who believe in the mission and want to help guide and grow the organization.<br>
     • <b>A clinician advisory board</b> — therapists, counselors, and child mental-health professionals to help shape the tools and keep them clinically sound.</p>
@@ -550,7 +566,8 @@ renderers.about=()=>{screen.innerHTML=`${topbar()}<div class="pad fade legal"><s
   <div class="card"><h3>Legal</h3>
     <p class="small">© 2026 Brave Kids United Inc — All rights reserved.<br>
     Brave Battle™ is a trademark of Brave Kids United Inc.<br>
-    Brave Kids United Inc is a nonprofit corporation registered in the State of Indiana.</p></div>
+    Brave Kids United Inc is a nonprofit corporation registered in the State of Indiana.</p>
+    <p class="small" style="margin-top:8px">This is a preview of a work in progress. All content and design — including the characters, artwork, written material, and coping tools — are proprietary to Brave Kids United Inc and may not be copied or reused without permission.</p></div>
   <button class="btn" onclick="goBack()">Back</button></div>`;};
 
 /* ---- onboarding (two steps: meet Bloom + name, then meet Tangle) ---- */
@@ -1209,6 +1226,7 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
       <a onclick="go('about')" style="display:block;text-align:center;background:var(--lilac);color:var(--grape-deep);font-weight:800;padding:11px;border-radius:12px;cursor:pointer;font-size:14px">🔎 Learn about our mission</a>
       <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--lilac);color:var(--grape-deep);font-weight:800;padding:11px;border-radius:12px;text-decoration:none;font-size:14px">✉️ Stay connected — updates as we grow</a>
+      <a href="https://www.facebook.com/BraveKidsUnited/" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--lilac);color:var(--grape-deep);font-weight:800;padding:11px;border-radius:12px;text-decoration:none;font-size:14px">👍 Follow us on Facebook</a>
     </div></div>
   <div class="statrow"><div class="statcard"><div class="statnum">${u.all}</div><div class="statlbl">MOMENTS</div></div>
     <div class="statcard"><div class="statnum">${u.week}</div><div class="statlbl">THIS WEEK</div></div>
