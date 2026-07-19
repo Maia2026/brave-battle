@@ -499,13 +499,14 @@ renderers.disclaimer=()=>{screen.innerHTML=`<div class="pad fade" style="padding
   </div>
   <button class="btn" onclick="acknowledge()">I understand ›</button>
   <button class="btn ghost" onclick="openCrisis()">Crisis Resources</button>
+  <div class="skipnote" style="margin-top:2px">Always available at the bottom of the screen using the 🆘 Help icon.</div>
   <div class="card" style="background:linear-gradient(160deg,#eaf6f8,#fff6df);margin-top:14px"><p style="font-weight:800;text-align:center;margin:0">Grown-ups — stay connected 💛</p>
     <p style="font-size:13px;text-align:center;margin-top:4px">We’ll let you know when the full app is ready.</p>
     <div style="display:flex;gap:8px;margin-top:10px">
       <a href="https://d75f5bf5.sibforms.com/serve/MUIFAFurrO-nDLnu0HvfUQxhFpyN5bpQfaa0rDWL7shGLt0_JJJfXFc63mrpkJJXhxViZmYc90WOvEtjixj10mYGFFzKP0aQm-G_MyKwOsTz6tYnHsu5LdxrgqxBFuYDpXhuPAkYdHAEojfWcPJ8c99RBqpRAUJlbmuSeRBEyL6mlwf3lrwi9SWKq3TWrr5AfGvWuq-5xb3YnTWtGQ==" target="_blank" rel="noopener" style="flex:1;text-align:center;background:var(--grape);color:#fff;font-weight:800;padding:10px;border-radius:12px;text-decoration:none;font-size:13px">✉️ Subscribe</a>
       <a href="https://www.facebook.com/BraveKidsUnited/" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#1877f2;color:#fff;font-weight:800;padding:10px;border-radius:12px;text-decoration:none;font-size:13px">Facebook</a>
     </div></div>
-  <div class="skipnote">This shows once on this device.</div></div>`;};
+  <div class="skipnote" style="font-style:italic">This shows once on this device. More info can be found in the Grown-Ups section within the app.</div></div>`;};
 function acknowledge(){state.acknowledged=true;state.ackVersion=ACK_VERSION;save();go(state.onboarded?'home':'onboard');}
 
 /* ---- crisis resources (reachable from anywhere, never gated) ---- */
