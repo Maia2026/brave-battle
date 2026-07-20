@@ -652,7 +652,9 @@ renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cache
     <div style="height:6px"></div>
     <button class="door before" onclick="go('feelComing')"><div class="emoji">🌤️</div><div><div class="dt">I feel it coming</div><div class="ds">Catch a big feeling early</div></div></button>
     <button class="door during" onclick="go('helpNow')"><div class="emoji">🔥</div><div><div class="dt">I need help NOW</div><div class="ds">It\u2019s big right now</div></div></button>
-    <button class="door brave" onclick="go('bravePick')"><div class="emoji">🦁</div><div><div class="dt">Be brave</div><div class="ds">Do a scary thing, one tiny step</div></div></button>
+    ${state.olderKids
+      ? `<button class="door brave" onclick="go('beKind')"><div class="emoji">🫶</div><div><div class="dt">Be Kind — to yourself</div><div class="ds">Self-talk, self-worth, and giving your body credit</div></div></button>`
+      : `<button class="door brave" onclick="go('bravePick')"><div class="emoji">🦁</div><div><div class="dt">Be brave</div><div class="ds">Do a scary thing, one tiny step</div></div></button>`}
     <button class="door people" onclick="go('detectiveHub')"><div class="emoji">🔍</div><div><div class="dt">Be a Detective</div><div class="ds">Read people &amp; check tricky thoughts</div></div></button>
     <button class="door gratitude" onclick="go('sunshine')"><div class="emoji">☀️</div><div><div class="dt">Sunshine</div><div class="ds">Good things &amp; a reminder you\u2019re loved</div></div></button>
     <div class="minirow">
@@ -922,7 +924,8 @@ renderers.breathe=(d)=>{const next=d.next||'afterTool';
       if($('bc'))c.textContent=cyc+' breath'+(cyc>1?'s':'')+' to go';tick();},8000);breatheTimers.push(iv);},900));};
 
 /* ---- mantra / faith tool ---- */
-renderers.mantra=()=>{const all=MANTRAS.concat(state.customMantras||[]);
+const MANTRAS_TEEN=['I\u2019m allowed to be a work in progress.','My worth isn\u2019t up for debate.','I don\u2019t have to earn rest or kindness.','Comparison is a trap — I\u2019m running my own race.','I can feel insecure and still show up.','One bad day is not my whole story.','I\u2019m allowed to take up space.','I get to set boundaries, and that\u2019s healthy.','I don\u2019t have to be liked by everyone.','Progress counts, even when it\u2019s slow.','My value isn\u2019t based on how I look.','I can be proud of myself without being perfect.','What other people think of me is not my responsibility.','I\u2019m learning who I am, and that takes time.','I can be my own friend right now.'];
+renderers.mantra=()=>{const all=(state.olderKids?MANTRAS_TEEN.concat(MANTRAS):MANTRAS).concat(state.customMantras||[]);
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">POSITIVE MANTRAS 💜</span><div class="step-title">Say it strong</div>
   <div class="step-sub">Tap one and say it out loud — like you mean it!</div>
   ${all.map(m=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">💜</span>${esc(m)}</button>`).join('')}
@@ -939,6 +942,12 @@ renderers.faithTool=()=>{if(!faithOn()){afterTool();return;}const m=pickRandom(f
   <button class="btn go" onclick="afterTool()">Amen 💜</button></div>`;};
 
 /* ---- 3) BE BRAVE ---- */
+renderers.beKind=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE KIND — TO YOURSELF 🫶</span>
+  <div class="step-title">The kindest voice can be your own</div><div class="duo" style="margin:6px auto">${pip('',92)}</div>
+  <div class="card"><p>You\u2019re often way harder on yourself than you\u2019d ever be on a friend. This is a place to flip that — to talk to yourself with the same kindness you give everyone else.</p></div>
+  <button class="door gratitude" onclick="pickTool('friend')"><div class="emoji">🫶</div><div><div class="dt">Be the friend you would be</div><div class="ds">Catch the harsh voice and flip it kind</div></div></button>
+  <button class="door before" onclick="pickTool('body')"><div class="emoji">💪</div><div><div class="dt">Body Appreciation</div><div class="ds">Give your body credit for what it does</div></div></button>
+  <button class="door people" onclick="pickTool('mantra')"><div class="emoji">💜</div><div><div class="dt">Positive self-talk</div><div class="ds">Lines to say to yourself, like you mean it</div></div></button></div>`;};
 renderers.bravePick=()=>{flow={section:'brave'};screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE BRAVE 🦁</span>
   <div class="step-title">What feels scary?</div><div class="step-sub">Brave doesn\u2019t mean not scared. It means trying anyway. 💪</div>
   ${FEARS.map((f,i)=>`<button class="choice" onclick="pickFear(${i})"><span class="ce">${f.e}</span>${esc(f.t)}</button>`).join('')}
