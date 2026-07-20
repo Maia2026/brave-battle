@@ -266,7 +266,7 @@ const MONSTER_SIZES=[140,126,112,100,88,76,64];
 function freshState(){return{
   onboarded:false, acknowledged:false, ackVersion:0, points:0, totalPoints:0, monsterShrink:0,
   theme:'grape', wearing:null, owned:{}, unlockedThemes:['grape'],
-  faith:true, faithLevel:'light', pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[], rewards:[], pendingClaims:[], earnedRewards:[],
+  faith:true, faithLevel:'light', olderKids:false, favs:[], pin:'1234', log:[], gratitudes:[], customMantras:[], moods:[], rewards:[], pendingClaims:[], earnedRewards:[],
   usedDays:{}, streakCount:0, lastUseDay:''
 };}
 const ACK_VERSION=2; // bump to re-show the welcome/disclosures to everyone after legal changes
@@ -338,8 +338,8 @@ function monsterMad(){return Math.max(0,1-state.monsterShrink*0.16);}
 
 /* ---- content ---- */
 const TOOLS=[
-  {id:'move',e:'🛼',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵','Do 10 wall push-ups 💪','Hop on one foot, then the other 🦩','Crab-walk across the room 🦀','Squeeze a pillow as hard as you can, then drop it 🛏️','March in place like a wind-up toy 🥁','Do 10 big arm circles each way 🌪️','Pretend to jump rope for 20 jumps 🤾','Wiggle like a noodle, then freeze like a statue 🍜']},
-  {id:'calmbody',e:'🧸',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Hold something soft and notice how it feels 🧸','Press your palms together, then release 🙌','Rock slowly side to side 🎐','Put a hand on your heart and feel it slow down 💗','Give yourself a big cross-arm hug 🤗','Push your hands into your lap and hold, then relax 👐','Warm your hands by rubbing them together 🔥','Curl up small, then s-t-r-e-t-c-h out tall 🐢']},
+  {id:'move',e:'🏃',name:'Move my body',kind:'list',ideas:['Do 10 big jumping jacks 🤸','Run one lap around the room 🏃','Push the wall like you hold up the house 🧱','Big animal stomps across the floor 🦣','Shake the wiggles out, head to toe 🌀','Dance hard to one fast song 🎵','Do 10 wall push-ups 💪','Hop on one foot, then the other 🦩','Crab-walk across the room 🦀','Squeeze a pillow as hard as you can, then drop it 🛏️','March in place like a wind-up toy 🥁','Do 10 big arm circles each way 🌪️','Pretend to jump rope for 20 jumps 🤾','Wiggle like a noodle, then freeze like a statue 🍜'],olderIdeas:['Go for a hard, fast walk 🚶','Do a set of push-ups 💪','Run up and down the stairs a few times 🪜','Do 20 squats or wall-sits 🦵','Put on a song and move until it ends 🎧','Do a quick set of jumping jacks 🤸','Stretch it out, head to toe 🧘','Go outside and walk it off 🌳','Do a plank for as long as you can 🕐','Shadow-box the tension out 🥊']},
+  {id:'calmbody',e:'🧘',name:'Calm my body',kind:'list',ideas:['Hug a pillow tight, then let it go 🛏️','Wrap up like a cozy blanket burrito 🌯','Press your feet into the floor, strong and still 🦶','Trace your hand slowly while you breathe ✋','Hold something soft and notice how it feels 🧸','Press your palms together, then release 🙌','Rock slowly side to side 🎐','Put a hand on your heart and feel it slow down 💗','Give yourself a big cross-arm hug 🤗','Push your hands into your lap and hold, then relax 👐','Warm your hands by rubbing them together 🔥','Curl up small, then s-t-r-e-t-c-h out tall 🐢'],olderIdeas:['Drop your shoulders and unclench your jaw 😮\u200d💨','Press your feet into the floor and feel steady 🦶','Put a hand on your chest and slow your breathing 💗','Hold something warm and just notice it ☕','Roll your shoulders and neck slowly 🔄','Lie down and let your body go heavy 🛋️','Wrap up in something warm 🧣','Stretch slowly, breathing out on each one 🧘']},
   {id:'ground',e:'🖐️',name:'5-4-3-2-1 grounding',kind:'ground'},
   {id:'senses',e:'🌡️',name:'Cool down my senses',kind:'senses'},
   {id:'squeeze',e:'✊',name:'Squeeze and let go',kind:'squeeze'},
@@ -350,9 +350,11 @@ const TOOLS=[
   {id:'figure8',e:'➰',name:'Figure-8 breathing',kind:'fig8'},
   {id:'water',e:'🧊',name:'Cold water',kind:'list',ideas:['Sip cold water slowly and feel it cool you down 🧊','Splash a little cold water on your face 💦','Hold a cold drink and take slow breaths ❄️','Run cool water over your wrists 🚰','Hold an ice cube until it starts to melt 🧊','Press a cool cloth to the back of your neck 🧻','Breathe out slowly like you are fogging a window 🌬️']},
   {id:'mantra',e:'💜',name:'Say positive mantras',kind:'mantra'},
-  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️','Growl it into a pillow 🦁','Make an angry drawing, then turn it into something silly 🎨','Stomp it into the ground, one stomp per word 👣','Blow the feeling into a balloon (pretend) and let it go 🎈','Tell it to leave, out loud, like a boss 🚪','Draw the feeling as a weather picture ⛈️']},
+  {id:'express',e:'✏️',name:'Get the feeling out',kind:'list',ideas:['Draw what the big feeling looks like ✏️','Scribble hard on scratch paper, then crumple it 🗒️','Write it down, then rip it up 📄','Say it out loud in a calm-down spot 🗣️','Growl it into a pillow 🦁','Make an angry drawing, then turn it into something silly 🎨','Stomp it into the ground, one stomp per word 👣','Blow the feeling into a balloon (pretend) and let it go 🎈','Tell it to leave, out loud, like a boss 🚪','Draw the feeling as a weather picture ⛈️'],olderIdeas:['Write out exactly what you\u2019re feeling, then rip it up 📄','Vent it into a notes app, then delete it 📱','Say it out loud where no one can hear 🗣️','Write a letter you\u2019ll never send ✉️','Put on music that matches the mood 🎧','Draw or doodle the feeling out 🎨','Journal for 5 minutes without stopping 📓','Punch a pillow a few times 🥊']},
   {id:'tell',e:'💬',name:'Tell Bloom about it',kind:'tell'},
   {id:'kind',e:'🌟',name:'Do a kind thing',kind:'list',ideas:['Give someone a real compliment 💬','Draw a little thank-you note 💌','Help with one small chore without being asked 🧹','Check on someone who seems sad 🫂','Say something kind to YOURSELF in the mirror 🪞','Share something with someone 🤝','Give someone a high five or a hug 🖐️','Do one thing that makes a grown-up smile 😊']},
+  {id:'friend',e:'🫶',name:'Be the friend you would be!',kind:'friend'},
+  {id:'body',e:'💪',name:'Body Appreciation',kind:'body'},
   {id:'faith',e:'🙏',name:'Prayer or verse',kind:'faith'},
   {id:'distract',e:'🎲',name:'Distract me',kind:'distract'},
 ];
@@ -597,6 +599,19 @@ renderers.meetTangle=()=>{screen.innerHTML=`<div class="pad fade" style="padding
 /* ---- greeting ---- */
 function checkedInToday(){const t=todayKey();return (state.moods||[]).some(m=>m.day===t);}
 function todayMood(){const t=todayKey();return (state.moods||[]).find(m=>m.day===t)||{e:'🙂',t:'Okay'};}
+const MOOD_TOOLS={
+  'Mad':{tip:'When you\u2019re mad, moving the big energy out helps first.',ids:['move','squeeze','balloon']},
+  'Worried':{tip:'When you\u2019re worried, slowing your body and naming the worry helps.',ids:['ground','balloon','tell']},
+  'Sad':{tip:'When you\u2019re sad, comfort and connection help more than distraction.',ids:['tell','friend','kind']},
+  'Meh':{tip:'A little movement or a small good deed can lift a meh mood.',ids:['move','kind','distract']}
+};
+function suggestForMood(t){const m=MOOD_TOOLS[t];if(!m)return;flow={section:'helpNow'};
+  const tools=m.ids.map(id=>TOOLS.find(x=>x.id===id)).filter(Boolean).filter(x=>x.kind!=='faith'||faithOn());
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">A FEW IDEAS 💜</span>
+  <div class="step-title">Feeling ${esc(t.toLowerCase())}? Let\u2019s try one.</div>
+  <div class="card tip"><p>${m.tip}</p></div>
+  ${tools.map(t2=>`<button class="choice" onclick="pickTool('${t2.id}')"><span class="ce">${t2.e}</span>${esc(t2.name)}</button>`).join('')}
+  <button class="btn ghost" onclick="go('toolList')">See all my tools 🧰</button></div>`;}
 function doCheckin(i){const c=CHECKINS[i];if(!state.moods)state.moods=[];
   state.moods.unshift({day:todayKey(),ts:Date.now(),e:c.e,t:c.t});
   if(state.moods.length>200)state.moods=state.moods.slice(0,200);
@@ -607,7 +622,7 @@ function doCheckin(i){const c=CHECKINS[i];if(!state.moods)state.moods=[];
     <div class="duo" style="margin:10px 0">${pip('happy',100)}</div>
     <div class="big">${low?'That\u2019s a hard way to feel. I\u2019m really glad you said it out loud. Want to use a tool together?':'I love hearing that. Let\u2019s keep the good going!'}</div>
     <div class="pointpop">+${PTS.checkin} ⭐</div>
-    ${low?`<button class="btn" style="max-width:260px" onclick="go('helpNow')">Yes, help me now 🔥</button>
+    ${low?`<button class="btn" style="max-width:260px" onclick="suggestForMood('${c.t}')">Yes, help me now 🔥</button>
       <button class="btn ghost" style="max-width:260px" onclick="go('home')">I\u2019m okay for now</button>`
     :`<button class="btn" style="max-width:260px" onclick="go('sunshine')">Go to Sunshine ☀️</button>
       <button class="btn ghost" style="max-width:260px" onclick="go('home')">Back home</button>`}</div>`;burst();}
@@ -671,12 +686,15 @@ renderers.feelComing=()=>{flow={section:'feelComing'};screen.innerHTML=`${topbar
   <div class="step-sub">You opened the app early — that\u2019s a big win already! 🌟</div>
   ${WARN.map((w,i)=>`<button class="choice" onclick="pickWarn(${i})"><span class="ce">${w.e}</span>${esc(w.t)}</button>`).join('')}</div>`;};
 function pickWarn(i){flow.warn=WARN[i].t;go('rate',{when:'now'});}
-renderers.earlyPick=()=>{const sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'🖐️',t:'Do 5-4-3-2-1 grounding',id:'ground'},{e:'🦋',t:'Give myself a butterfly hug',id:'butterfly'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'squeeze'}];
+renderers.earlyPick=()=>{let sk;const favs=(state.favs||[]).map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).filter(t=>t.kind!=='faith'||faithOn());
+  if(favs.length){sk=favs.map(t=>({e:t.e,t:t.name,id:'tool:'+t.id}));}
+  else{sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'🖐️',t:'Do 5-4-3-2-1 grounding',id:'ground'},{e:'🦋',t:'Give myself a butterfly hug',id:'butterfly'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'squeeze'}];}
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PICK ONE QUICK THING</span><div class="step-title">Catch it before it grows</div>
   ${sk.map((s,i)=>`<button class="choice" onclick="earlyDo(${i})"><span class="ce">${s.e}</span>${esc(s.t)}</button>`).join('')}
   <button class="btn ghost" onclick="go('toolList')">See all my tools 🧰</button></div>`;
   window._early=sk;};
 function earlyDo(i){const s=window._early[i];flow.tool=s.t;
+  if(s.id&&s.id.indexOf('tool:')===0){pickTool(s.id.slice(5));return;}
   if(s.id==='balloon')go('breathe',{next:'afterEarly'});
   else if(s.id==='ground')go('ground',{n:0});
   else if(s.id==='butterfly')go('butterfly');
@@ -701,7 +719,13 @@ renderers.helpPick=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style
 function justHelp(){flow.tool=TOOLS.find(t=>t.id==='balloon');go('breathe',{next:'afterTool'});}
 renderers.toolList=()=>{const list=TOOLS.filter(t=>t.kind!=='faith'||faithOn());
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">MY TOOLS 🧰</span><div class="step-title">Pick any tool</div>
-  ${list.map(t=>`<button class="choice" onclick="pickTool('${t.id}')"><span class="ce">${t.e}</span>${esc(t.name)}</button>`).join('')}</div>`;};
+  <div class="step-sub">Tap a tool to use it. Tap the ☆ to add it to your favorites — they show up first when you need help fast.</div>
+  ${list.map(t=>{const fav=(state.favs||[]).includes(t.id);
+    return `<div class="choice" style="display:flex;align-items:center;gap:0;padding:0;overflow:hidden">
+      <button onclick="pickTool('${t.id}')" style="flex:1;display:flex;align-items:center;gap:12px;background:none;border:none;padding:14px 8px 14px 16px;text-align:left;font:inherit;color:inherit;cursor:pointer"><span class="ce" style="margin:0">${t.e}</span>${esc(t.name)}</button>
+      <button onclick="toggleFav('${t.id}')" aria-label="favorite" style="background:none;border:none;font-size:22px;padding:14px 16px;cursor:pointer;color:${fav?'#f5b800':'#c9c2d6'}">${fav?'⭐':'☆'}</button>
+    </div>`;}).join('')}</div>`;};
+function toggleFav(id){if(!state.favs)state.favs=[];const i=state.favs.indexOf(id);if(i>=0)state.favs.splice(i,1);else state.favs.push(id);save();renderers.toolList();}
 function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
   if(t.kind==='breath')go('breathe',{next:'afterTool'});
   else if(t.kind==='mantra')go('mantra');
@@ -713,8 +737,83 @@ function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
   else if(t.kind==='fig8')go('fig8');
   else if(t.kind==='squeeze')go('squeeze',{n:0});
   else if(t.kind==='tell')go('tellWrite');
+  else if(t.kind==='friend')go('friendStart');
+  else if(t.kind==='body')go('bodyStart');
   else go('doTool',{id});}
 
+
+
+/* ---- Be the friend you would be! (self-talk flip) ---- */
+const MEAN_VOICE=['I\u2019m so stupid','I always mess up','Nobody likes me','I can\u2019t do anything right','I\u2019m not good enough','Everyone is better than me','I\u2019m ugly','I\u2019m a failure','I\u2019ll never get this','It\u2019s all my fault'];
+const KIND_BACK=['Everyone makes mistakes — that\u2019s how we learn.','You\u2019re still learning, and that\u2019s okay.','One hard moment isn\u2019t the whole story.','You are enough, exactly as you are.','I\u2019ve seen you do hard things before.','You don\u2019t have to be perfect to matter.','That was a tough moment, not a bad you.','You\u2019re allowed to have an off day.','I\u2019m proud of you for trying.','You are worth being kind to.'];
+let fr={};
+renderers.friendStart=()=>{flow.tool=flow.tool||{name:'Be the friend you would be!'};fr={mean:'',kind:''};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE THE FRIEND YOU WOULD BE 🫶</span>
+  <div class="step-title">The voice in your head</div><div class="duo" style="margin:4px auto">${pip('',88)}</div>
+  <div class="step-sub">Sometimes that voice is way harsher than we\u2019d ever be to a friend. Let\u2019s catch it. What did it say?</div>
+  ${MEAN_VOICE.map((t,i)=>`<button class="choice" onclick="frPickMean(${i})"><span class="ce">💭</span>"${esc(t)}"</button>`).join('')}
+  <input id="frm" type="text" placeholder="…or type what it said" maxlength="80">
+  <button class="btn" onclick="frMeanNext()">Next ›</button>
+  <button class="btn ghost" onclick="afterTool()">Skip</button></div>`;};
+function frPickMean(i){const el=$('frm');if(el)el.value=MEAN_VOICE[i];}
+function frMeanNext(){fr.mean=($('frm').value||'').trim().slice(0,80);if(!fr.mean){$('frm').focus();return;}go('friendMirror');}
+renderers.friendMirror=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">WAIT A SECOND 🤔</span>
+  <div class="duo" style="margin:8px auto">${pip('',96)}</div>
+  <div class="card"><p style="font-size:15px">Your brain said:</p><p style="font-weight:800;color:var(--grape-deep);font-size:17px;margin-top:4px">"${esc(fr.mean)}"</p></div>
+  <div class="card tip" style="text-align:left"><p><b>Now imagine your best friend said that about themselves.</b> Would you agree with them… or would you stick up for them?</p></div>
+  <button class="btn" onclick="go('friendKind')">I\u2019d stick up for them ›</button></div>`;};
+renderers.friendKind=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT WOULD YOU TELL THEM?</span>
+  <div class="step-title">Say it to your friend</div>
+  <div class="step-sub">Pick what you\u2019d tell a friend who felt this way — or write your own.</div>
+  ${KIND_BACK.map((t,i)=>`<button class="choice" onclick="frPickKind(${i})"><span class="ce">🫶</span>${esc(t)}</button>`).join('')}
+  <input id="frk" type="text" placeholder="…or say it your own way" maxlength="120">
+  <button class="btn" onclick="frKindNext()">Next ›</button></div>`;};
+function frPickKind(i){const el=$('frk');if(el)el.value=KIND_BACK[i];}
+function frKindNext(){fr.kind=($('frk').value||'').trim().slice(0,120);if(!fr.kind){$('frk').focus();return;}go('friendDone');}
+renderers.friendDone=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">NOW SAY IT TO YOU 💜</span>
+  <div class="duo" style="margin:8px auto">${pip('happy',104)}</div>
+  <div class="card" style="background:#eafaf3"><p style="font-size:13px;font-weight:700;color:var(--ink-soft)">You\u2019d tell a friend:</p><p style="font-size:17px;font-weight:800;margin-top:4px">"${esc(fr.kind)}"</p></div>
+  <div class="card tip"><p>You deserve that same kindness. Try saying it to yourself — out loud, or just in your head. You are your own friend too. 🫶</p></div>
+  <button class="btn go" onclick="afterTool()">I said it 💜</button></div>`;};
+
+/* ---- Body Appreciation (functionality appreciation) ---- */
+const BODY_PARTS=[
+  {e:'🦵',name:'My legs',opts:['carry me everywhere I want to go','let me run, jump, and play','help me dance to my favorite song','keep me standing strong','get me up the stairs and out the door']},
+  {e:'💪',name:'My arms & hands',opts:['let me hug the people I love','help me build, draw, and create','carry the things I need','let me play sports or instruments','high-five my friends']},
+  {e:'❤️',name:'My heart',opts:['beats all day without me asking','keeps me going when I run and play','works hard to keep me alive','pumps faster when I\u2019m excited','never takes a day off']},
+  {e:'🫁',name:'My lungs',opts:['give me deep, calming breaths','let me laugh really hard','help me sing and shout','keep me going when I run','fill me up when I yawn']},
+  {e:'👀',name:'My eyes',opts:['let me see the people I love','show me my favorite places','help me read and learn','let me watch a sunset','notice the little good things']},
+  {e:'👂',name:'My ears',opts:['let me hear my favorite music','catch my friends\u2019 voices','hear laughter and jokes','let me learn new things','notice a bird outside']},
+  {e:'🧠',name:'My brain',opts:['helps me figure things out','remembers happy times','learns new things every day','keeps me curious','comes up with cool ideas']},
+  {e:'🦶',name:'My feet',opts:['take me new places','keep me balanced','let me run and climb','carry me all day long','help me dance']},
+];
+let bd={};
+renderers.bodyStart=()=>{flow.tool=flow.tool||{name:'Body Appreciation'};bd={part:null,picks:[]};
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BODY APPRECIATION 💪</span>
+  <div class="step-title">Give your body some credit</div>
+  <div class="step-sub">Not about how it looks — about everything it <b>does</b> for you. Pick a part to start.</div>
+  ${BODY_PARTS.map((p,i)=>`<button class="choice" onclick="go('bodyPart',{i:${i}})"><span class="ce">${p.e}</span>${esc(p.name)}</button>`).join('')}
+  <button class="btn ghost" onclick="afterTool()">Skip for now</button></div>`;};
+renderers.bodyPart=(d)=>{const p=BODY_PARTS[d.i];bd.part=p;
+  screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${esc(p.name.toUpperCase())} ${p.e}</span>
+  <div class="step-title">${esc(p.name)}…</div>
+  <div class="step-sub">Which of these feel true? Tap any you like.</div>
+  ${p.opts.map(o=>`<button class="choice" onclick="this.classList.toggle('on')"><span class="ce">✨</span>${esc(o)}</button>`).join('')}
+  <input id="bdx" type="text" placeholder="…or add your own thing it does" maxlength="80">
+  <button class="btn go" onclick="bodyDone()">Done ✅</button>
+  <button class="btn ghost" onclick="go('bodyStart')">Pick a different part</button>
+  <div class="skipnote">No pressure — you can skip any part. 💜</div></div>`;};
+function bodyDone(){const picks=[...document.querySelectorAll('.choice.on')].map(b=>b.textContent.trim());
+  const custom=($('bdx')&&$('bdx').value.trim())||'';if(custom)picks.push(custom.slice(0,80));
+  bd.picks=picks;const part=bd.part?bd.part.name.toLowerCase():'your body';
+  screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">NICE 💜</span>
+  <div class="duo" style="margin:8px auto">${pip('happy',104)}</div>
+  ${picks.length?`<div class="card" style="background:#eafaf3;text-align:left"><p style="font-weight:700">${esc(bd.part?bd.part.name:'Your body')} ${picks.length>1?'do':'does'} a lot for you:</p><p style="margin-top:6px">${picks.map(p=>'✨ '+esc(p)).join('<br>')}</p></div>`
+    :`<div class="card"><p>Even when it\u2019s hard to think of something, ${esc(part)} is quietly working for you all day. 💜</p></div>`}
+  <div class="card tip"><p>Your body is a good teammate — it helps you live your life, not just look a certain way. That\u2019s worth some credit.</p></div>
+  <button class="btn go" onclick="bodyFinish()">Thanks, body 💪</button>
+  <button class="btn ghost" onclick="go('bodyStart')">Appreciate another part</button></div>`;}
+function bodyFinish(){award(1);recordUsageDay();logSunshine('Body appreciation');save();afterTool();}
 
 /* ---- Cool down my senses (temperature/grounding, guided) ---- */
 const SENSE_STEPS=[{e:'🧊',t:'Something cool',s:'Find something cool to touch — a wall, a window, a cold drink. Hold it for a few breaths.'},{e:'👂',t:'One quiet sound',s:'Close your eyes and find the quietest sound you can hear. Just listen to it.'},{e:'🫁',t:'One long breath',s:'Breathe in for 4... and out for 6, long and slow, like you are cooling soup.'},{e:'🦶',t:'Feel the floor',s:'Press your feet down and notice the ground holding you up. You are steady.'}];
@@ -784,7 +883,8 @@ function tellDone(){const t=$('tw');flow.told=t?t.value.trim().slice(0,500):'';
   <div class="card"><p>${flow.told?'That sounds really hard. I\u2019m glad you said it out loud instead of holding it in.':'Whenever you\u2019re ready to say it, I\u2019m here.'}</p></div>
   <div class="card tip"><p>Feelings get smaller when we share them. You just made yours a little smaller.</p></div>
   <button class="btn go" onclick="afterTool()">I feel a bit lighter ✅</button></div>`;}
-renderers.doTool=(d)=>{const t=TOOLS.find(x=>x.id===d.id);const idea=t.ideas[Math.floor(Math.random()*t.ideas.length)];const secs=t.id==='move'?60:45;const circ=2*Math.PI*86;
+function ideasFor(t){return (state.olderKids&&t.olderIdeas)?t.olderIdeas:t.ideas;}
+renderers.doTool=(d)=>{const t=TOOLS.find(x=>x.id===d.id);const _pool=ideasFor(t);const idea=_pool[Math.floor(Math.random()*_pool.length)];const secs=t.id==='move'?60:45;const circ=2*Math.PI*86;
   screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">${esc(t.name.toUpperCase())}</span><div class="step-title">Your mission:</div>
   <div class="card"><h3 style="margin:0;text-align:center">${esc(idea)}</h3></div>
   <div class="timer-ring"><svg width="198" height="198"><circle cx="99" cy="99" r="86" stroke="var(--lilac)" stroke-width="20" fill="none"/>
@@ -1270,6 +1370,8 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
     ${(state.rewards||[]).length<1?`<div style="font-weight:800;color:var(--grape-deep);margin-top:8px;font-size:13px">Quick ideas — tap to add:</div>
       <div class="chipwrap">${REWARD_IDEAS.map((r,i)=>`<button class="chip" onclick="addRewardIdea(${i})">${esc(r[0])} · ${r[1]}⭐</button>`).join('')}</div>`:''}</div>
   <div class="card"><h3>Settings</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><div><b>Older kids (pre-teen/teen wording)</b><br><span class="skipnote" style="text-align:left">More mature language in the coping tools, for kids who\u2019ve hit puberty.</span></div>
+      <button class="tag ${state.olderKids?'use':'buy'}" onclick="toggleOlder()">${state.olderKids?'On':'Off'}</button></div>
     <div><b>Faith level</b><br><span class="skipnote" style="text-align:left">Shapes the "You Are Loved" moments and the prayer tool. Your child sees nothing about this setting.</span></div>
     ${[['none','None','Fully secular. Warm encouragement only.'],['light','Light','The Golden Rule and kindness. No scripture.'],['medium','Medium','Short verses with the message.'],['high','High','Full faith moments, with a prayer to say.']]
       .map(l=>`<button class="choice ${state.faithLevel===l[0]?'on':''}" style="margin-top:8px" onclick="setFaith('${l[0]}')"><span class="ce">${state.faithLevel===l[0]?'✅':'⬜'}</span><span><b>${l[1]}</b><br><span style="font-weight:600;font-size:12.5px;opacity:.85">${l[2]}</span></span></button>`).join('')}
@@ -1279,6 +1381,7 @@ renderers.parentHome=()=>{const u=usageCounts();const sec={feelComing:'I feel it
     <button class="btn ghost" style="color:#d8334a" onclick="wipe()">Reset all data on this device</button></div>
   <button class="btn" onclick="go('home')">Back to the app</button></div>`;};
 function setFaith(v){state.faithLevel=v;state.faith=(v!=='none');save();go('parentHome');}
+function toggleOlder(){state.olderKids=!state.olderKids;save();go('parentHome');}
 function addReward(){if(!state.rewards)state.rewards=[];state.rewards.push({id:'r'+Date.now(),name:'New reward',cost:20});save();go('parentHome');}
 function addRewardIdea(i){if(!state.rewards)state.rewards=[];const r=REWARD_IDEAS[i];state.rewards.push({id:'r'+Date.now(),name:r[0],cost:r[1]});save();go('parentHome');}
 function saveReward(id){const r=(state.rewards||[]).find(x=>x.id===id);if(!r)return;const nb=$('rn_'+id),cb=$('rc_'+id);if(nb&&nb.value.trim())r.name=nb.value.trim().slice(0,50);if(cb){const n=parseInt(cb.value,10);if(!isNaN(n)&&n>0)r.cost=n;}save();go('parentHome');}
