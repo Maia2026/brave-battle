@@ -603,7 +603,7 @@ function todayMood(){const t=todayKey();return (state.moods||[]).find(m=>m.day==
 const MOOD_TOOLS={
   'Mad':{tip:'When you\u2019re mad, moving the big energy out helps first.',ids:['move','squeeze','balloon']},
   'Worried':{tip:'When you\u2019re worried, slowing your body and naming the worry helps.',ids:['ground','balloon','tell']},
-  'Sad':{tip:'When you\u2019re sad, comfort and connection help more than distraction.',ids:['tell','friend','kind']},
+  'Sad':{tip:'When you\u2019re sad, comfort and connection help more than distraction.',ids:['tell','kind','calmbody']},
   'Meh':{tip:'A little movement or a small good deed can lift a meh mood.',ids:['move','kind','distract']}
 };
 function suggestForMood(t){const m=MOOD_TOOLS[t];if(!m)return;flow={section:'helpNow'};
@@ -656,7 +656,9 @@ renderers.home=()=>{const streak=currentStreak();const u=usageCounts();if(!cache
     ${state.olderKids
       ? `<button class="door brave" onclick="go('beKind')"><div class="emoji">🫶</div><div><div class="dt">Be Kind — to yourself</div><div class="ds">Self-talk, self-worth, and giving your body credit</div></div></button>`
       : `<button class="door brave" onclick="go('bravePick')"><div class="emoji">🦁</div><div><div class="dt">Be brave</div><div class="ds">Do a scary thing, one tiny step</div></div></button>`}
-    <button class="door people" onclick="go('detectiveHub')"><div class="emoji">🗣️</div><div><div class="dt">Let\u2019s Talk It Through</div><div class="ds">People, thoughts, mix-ups &amp; being kind to you</div></div></button>
+    ${state.olderKids
+      ? `<button class="door people" onclick="go('detectiveHub')"><div class="emoji">🗣️</div><div><div class="dt">Let\u2019s Talk It Through</div><div class="ds">People, thoughts, mix-ups &amp; being kind to you</div></div></button>`
+      : `<button class="door people" onclick="go('detectiveHub')"><div class="emoji">🔍</div><div><div class="dt">Check the Clues</div><div class="ds">Figure out what\u2019s really going on</div></div></button>`}
     <button class="door gratitude" onclick="go('sunshine')"><div class="emoji">☀️</div><div><div class="dt">Sunshine</div><div class="ds">Good things &amp; a reminder you\u2019re loved</div></div></button>
     <div class="minirow">
       <button class="minicard" onclick="go('wins')"><div class="mi">🏆</div><div class="ml">My Wins</div></button>
@@ -689,7 +691,7 @@ renderers.feelComing=()=>{flow={section:'feelComing'};const WLIST=state.olderKid
   <div class="step-sub">You opened the app early — that\u2019s a big win already! 🌟</div>
   ${WLIST.map((w,i)=>`<button class="choice" onclick="pickWarn(${i})"><span class="ce">${w.e}</span>${esc(w.t)}</button>`).join('')}</div>`;};
 function pickWarn(i){const WLIST=state.olderKids?WARN_TEEN:WARN;flow.warn=WLIST[i].t;go('rate',{when:'now'});}
-renderers.earlyPick=()=>{let sk;const favs=(state.favs||[]).map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).filter(t=>t.kind!=='faith'||faithOn());
+renderers.earlyPick=()=>{let sk;const favs=(state.favs||[]).map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).filter(t=>t.kind!=='faith'||faithOn()).filter(t=>t.id!=='friend'&&t.id!=='body');
   if(favs.length){sk=favs.map(t=>({e:t.e,t:t.name,id:'tool:'+t.id}));}
   else{sk=[{e:'🎈',t:'Take 3 balloon breaths',id:'balloon'},{e:'💧',t:'Get a drink of water',id:'do'},{e:'🖐️',t:'Do 5-4-3-2-1 grounding',id:'ground'},{e:'🦋',t:'Give myself a butterfly hug',id:'butterfly'},{e:'🤝',t:'Tell a grown-up I trust',id:'do'},{e:'✊',t:'Squeeze and let go',id:'squeeze'}];}
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">PICK ONE QUICK THING</span><div class="step-title">Catch it before it grows</div>
@@ -979,8 +981,8 @@ function braveDo(){const steps=flow.ladder||['Talk about it with someone I trust
   <div class="skipnote">It\u2019s okay if you\u2019re not ready today. Coming back is brave too. 💜</div></div>`;}
 
 /* ---- 4) LET'S TALK IT THROUGH (hub: read people, check thoughts, repair, self-kindness) ---- */
-renderers.detectiveHub=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">LET\u2019S TALK IT THROUGH 🗣️</span>
-  <div class="step-title">Let\u2019s work it out together</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
+renderers.detectiveHub=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${state.olderKids?'LET\u2019S TALK IT THROUGH 🗣️':'CHECK THE CLUES 🔍'}</span>
+  <div class="step-title">${state.olderKids?'Let\u2019s work it out together':'Let\u2019s check the clues'}</div><div class="duo" style="margin:6px auto">${pip('',96)}</div>
   <div class="card"><p>Our brain makes fast <b>guesses</b> — about other people, about our own worried or mad thoughts, and even about ourselves. Let\u2019s slow down and figure out what\u2019s really true.</p></div>
   <button class="door people" onclick="go('peopleStart')"><div class="emoji">🧩</div><div><div class="dt">People Detective</div><div class="ds">Mean? joke? accident? Read the clues</div></div></button>
   <button class="door before" onclick="go('thoughtStart')"><div class="emoji">🔎</div><div><div class="dt">Thought Detective</div><div class="ds">5 questions to check a tricky thought</div></div></button>
