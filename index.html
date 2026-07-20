@@ -746,31 +746,34 @@ function pickTool(id){const t=TOOLS.find(x=>x.id===id);flow.tool=t;
 
 
 /* ---- Be the friend you would be! (self-talk flip) ---- */
-const MEAN_VOICE=['I\u2019m so stupid','I always mess up','Nobody likes me','I can\u2019t do anything right','I\u2019m not good enough','Everyone is better than me','I\u2019m ugly','I\u2019m a failure','I\u2019ll never get this','It\u2019s all my fault'];
+const MEAN_CATEGORIES=[{b:'Who I am',ph:'about who you are'},{b:'Something I did',ph:'about something you did'},{b:'What others think of me',ph:'about what other people think of you'},{b:'Not being good enough',ph:'about not being \u201cgood enough\u201d'},{b:'Something I\u2019m scared of',ph:'about something you\u2019re worried about'}];
 const KIND_BACK=['Everyone makes mistakes — that\u2019s how we learn.','You\u2019re still learning, and that\u2019s okay.','One hard moment isn\u2019t the whole story.','You are enough, exactly as you are.','I\u2019ve seen you do hard things before.','You don\u2019t have to be perfect to matter.','That was a tough moment, not a bad you.','You\u2019re allowed to have an off day.','I\u2019m proud of you for trying.','You are worth being kind to.'];
 let fr={};
-renderers.friendStart=()=>{flow.tool=flow.tool||{name:'Be the friend you would be!'};fr={mean:'',kind:''};
+renderers.friendStart=()=>{flow.tool=flow.tool||{name:'Be the friend you would be!'};fr={mean:'',ph:'',isCat:false,kind:''};
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">BE THE FRIEND YOU WOULD BE 🫶</span>
-  <div class="step-title">The voice in your head</div><div class="duo" style="margin:4px auto">${pip('',88)}</div>
-  <div class="step-sub">Sometimes that voice is way harsher than we\u2019d ever be to a friend. Let\u2019s catch it. What did it say?</div>
-  ${MEAN_VOICE.map((t,i)=>`<button class="choice" onclick="frPickMean(${i})"><span class="ce">💭</span>"${esc(t)}"</button>`).join('')}
-  <input id="frm" type="text" placeholder="…or type what it said" maxlength="80">
-  <button class="btn" onclick="frMeanNext()">Next ›</button>
-  <button class="btn ghost" onclick="afterTool()">Skip</button></div>`;};
-function frPickMean(i){const el=$('frm');if(el)el.value=MEAN_VOICE[i];}
-function frMeanNext(){fr.mean=($('frm').value||'').trim().slice(0,80);if(!fr.mean){$('frm').focus();return;}go('friendMirror');}
+  <div class="step-title">The voice in your head</div><div class="duo" style="margin:4px auto">${pip('',80)}</div>
+  <div class="step-sub">Sometimes that voice gets way harsher than we\u2019d ever be to a friend. What\u2019s it giving you a hard time about?</div>
+  <input id="frm" type="text" placeholder="Put it in your own words…" maxlength="100">
+  <button class="btn" onclick="frMeanNext()">Continue ›</button>
+  <div class="step-sub" style="margin-top:16px;font-size:13px">Not sure how to say it? It might be about…</div>
+  <div class="chipwrap">${MEAN_CATEGORIES.map((c,i)=>`<button class="chip" onclick="frPickCat(${i})">${esc(c.b)}</button>`).join('')}</div>
+  <button class="btn ghost" style="margin-top:12px" onclick="afterTool()">Skip</button></div>`;};
+function frPickCat(i){const c=MEAN_CATEGORIES[i];fr.mean=c.b;fr.ph=c.ph;fr.isCat=true;go('friendMirror');}
+function frMeanNext(){fr.mean=($('frm').value||'').trim().slice(0,100);fr.isCat=false;if(!fr.mean){$('frm').focus();return;}go('friendMirror');}
 renderers.friendMirror=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">WAIT A SECOND 🤔</span>
   <div class="duo" style="margin:8px auto">${pip('',96)}</div>
-  <div class="card"><p style="font-size:15px">Your brain said:</p><p style="font-weight:800;color:var(--grape-deep);font-size:17px;margin-top:4px">"${esc(fr.mean)}"</p></div>
-  <div class="card tip" style="text-align:left"><p><b>Now imagine your best friend said that about themselves.</b> Would you agree with them… or would you stick up for them?</p></div>
+  <div class="card">${fr.isCat
+    ? `<p style="font-size:16px">Your brain is being really hard on you <b>${esc(fr.ph)}</b>.</p>`
+    : `<p style="font-size:15px">Your brain said:</p><p style="font-weight:800;color:var(--grape-deep);font-size:17px;margin-top:4px">"${esc(fr.mean)}"</p>`}</div>
+  <div class="card tip" style="text-align:left"><p><b>Now imagine your best friend was being this hard on themselves.</b> Would you agree with them… or would you stick up for them?</p></div>
   <button class="btn" onclick="go('friendKind')">I\u2019d stick up for them ›</button></div>`;};
 renderers.friendKind=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">WHAT WOULD YOU TELL THEM?</span>
   <div class="step-title">Say it to your friend</div>
   <div class="step-sub">Pick what you\u2019d tell a friend who felt this way — or write your own.</div>
   ${KIND_BACK.map((t,i)=>`<button class="choice" onclick="frPickKind(${i})"><span class="ce">🫶</span>${esc(t)}</button>`).join('')}
   <input id="frk" type="text" placeholder="…or say it your own way" maxlength="120">
-  <button class="btn" onclick="frKindNext()">Next ›</button></div>`;};
-function frPickKind(i){const el=$('frk');if(el)el.value=KIND_BACK[i];}
+  <button class="btn ghost" onclick="frKindNext()">Use what I typed ›</button></div>`;};
+function frPickKind(i){fr.kind=KIND_BACK[i];go('friendDone');}
 function frKindNext(){fr.kind=($('frk').value||'').trim().slice(0,120);if(!fr.kind){$('frk').focus();return;}go('friendDone');}
 renderers.friendDone=()=>{screen.innerHTML=`${topbar()}<div class="pad fade" style="text-align:center"><span class="step-tag">NOW SAY IT TO YOU 💜</span>
   <div class="duo" style="margin:8px auto">${pip('happy',104)}</div>
@@ -902,6 +905,7 @@ renderers.moreHelp=()=>{if(!flow.tried)flow.tried=0;flow.tried++;const suggest=f
   <div class="step-sub">${flow.tried>1?`You\u2019ve tried ${flow.tried} tools — that\u2019s hard work!`:'You used a tool — nice job!'}</div>
   <div class="duo" style="margin:8px auto">${pip('',96)}</div>
   <button class="choice" onclick="go('rate',{when:'after'})"><span class="ce">😌</span>I feel better — let\u2019s check it</button>
+  ${(flow.tool&&flow.tool.id==='friend')?`<button class="choice" onclick="go('friendKind')"><span class="ce">🫶</span>Pick another kind thought</button>`:''}
   <button class="choice" onclick="moreTool()"><span class="ce">🔁</span>I need more help — try another tool</button>
   ${suggest?`<div class="card tip" style="margin-top:14px"><h3 style="margin:0">💜 You\u2019re working so hard.</h3><p>Big feelings sometimes need a grown-up, not just a tool. Want to find someone who can be with you?</p>
     <button class="btn" style="margin-top:8px" onclick="helpGrownUp()">Yes — I\u2019ll find a grown-up 🤗</button></div>`:''}
@@ -998,8 +1002,8 @@ renderers.repairWhat=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><sp
   <div class="step-title">What did you do?</div><div class="step-sub">Just honest — no judging. This stays private on your device.</div>
   ${REPAIR_WHAT.map((t,i)=>`<button class="choice" onclick="rpWhat(${i})"><span class="ce">•</span>${esc(t)}</button>`).join('')}
   <input id="rpx" type="text" placeholder="…or say it in your own words" maxlength="70">
-  <button class="btn" onclick="rpWhatNext()">Next ›</button></div>`;};
-function rpWhat(i){rp.what=REPAIR_WHAT[i];const el=$('rpx');if(el)el.value=(i===REPAIR_WHAT.length-1)?'':REPAIR_WHAT[i];}
+  <button class="btn ghost" onclick="rpWhatNext()">Use what I typed ›</button></div>`;};
+function rpWhat(i){if(i===REPAIR_WHAT.length-1){const el=$('rpx');if(el){el.value='';el.focus();}return;}rp.what=REPAIR_WHAT[i];go('repairFeel');}
 function rpWhatNext(){const typed=($('rpx').value||'').trim();rp.what=typed||rp.what;if(!rp.what){$('rpx').focus();return;}go('repairFeel');}
 renderers.repairFeel=()=>{screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">THEIR SHOES 👟</span>
   <div class="step-title">How might THEY have felt?</div>
@@ -1048,9 +1052,9 @@ renderers.thoughtStart=()=>{flow={section:'thought'};td={thought:'',answers:[]};
   <div class="step-title">What\u2019s the tricky thought?</div><div class="duo" style="margin:4px auto">${pip('',88)}</div>
   <div class="step-sub">A worried or mad thought that\u2019s bugging you. Tap one, or type your own.</div>
   ${TD_THOUGHTS.map((t,i)=>`<button class="choice" onclick="tdPick(${i})"><span class="ce">💭</span>${esc(t)}</button>`).join('')}
-  <input id="tdt" type="text" placeholder="…or type the thought" maxlength="60">
-  <button class="btn" onclick="tdNext()">Start the case ›</button></div>`;};
-function tdPick(i){$('tdt').value=TD_THOUGHTS[i];}
+  <input id="tdt" type="text" placeholder="…or type your own thought" maxlength="60">
+  <button class="btn ghost" onclick="tdNext()">Use what I typed ›</button></div>`;};
+function tdPick(i){td.thought=TD_THOUGHTS[i];td.answers=[];go('tdQ',{n:0});}
 function tdNext(){td.thought=($('tdt').value||'').trim().slice(0,60);if(!td.thought){$('tdt').focus();return;}td.answers=[];go('tdQ',{n:0});}
 renderers.tdQ=(d)=>{const i=d.n,q=DETQ[i];
   screen.innerHTML=`${topbar()}<div class="pad fade"><span class="step-tag">${q.tag}</span>
